@@ -12,7 +12,6 @@ namespace EngineLayer
         {
             List<PsmFromTsv> psms = new List<PsmFromTsv>();
             warnings = new List<string>();
-
             StreamReader reader = null;
             try
             {
