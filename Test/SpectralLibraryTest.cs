@@ -71,7 +71,7 @@ namespace Test
             Console.WriteLine(_second);
             Console.WriteLine(_first);
 
-            //Console.WriteLine("y");
+         
 
             var expectedFileContents = File.ReadAllLines(pathToExpectedSpectralLibaryResult);
             var testFileContenets = File.ReadAllLines(TestSpectralLibraryResultFullPath);
