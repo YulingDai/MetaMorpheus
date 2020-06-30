@@ -3,8 +3,11 @@ using EngineLayer.FdrAnalysis;
 using Proteomics;
 using Proteomics.Fragmentation;
 using Proteomics.ProteolyticDigestion;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using ThermoFisher.CommonCore.Data.Business;
 
 namespace EngineLayer
 {
@@ -15,7 +18,6 @@ namespace EngineLayer
 
         public PeptideSpectralMatch(PeptideWithSetModifications peptide, int notch, double score, int scanIndex, Ms2ScanWithSpecificMass scan, CommonParameters commonParameters, List<MatchedFragmentIon> matchedFragmentIons, double xcorr = 0)
         {
-
             _BestMatchingPeptides = new List<(int, PeptideWithSetModifications)>();
             ScanIndex = scanIndex;
             FullFilePath = scan.FullFilePath;
@@ -32,6 +34,8 @@ namespace EngineLayer
             Xcorr = xcorr;
             NativeId = scan.NativeId;
             RunnerUpScore = commonParameters.ScoreCutoff;
+            CollisionEnergy = scan.TheScan.HcdEnergy;
+            ScanFilter = scan.TheScan.ScanFilter;
 
             AddOrReplace(peptide, score, notch, true, matchedFragmentIons, xcorr);
         }
@@ -65,6 +69,8 @@ namespace EngineLayer
         public int NumDifferentMatchingPeptides { get { return _BestMatchingPeptides.Count; } }
         public FdrInfo FdrInfo { get; private set; }
         public PsmData PsmData_forPEPandPercolator { get; set; }
+        public string CollisionEnergy { get; }
+        public string ScanFilter { get; }
 
         public double Score { get; private set; }
         public double Xcorr;
@@ -336,6 +342,55 @@ namespace EngineLayer
                 ResolveAllAmbiguities();
             }
         }
+
+        public string Spectrum()
+        {
+            double totalIonCurrent = this.TotalIonCurrent;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Name: " + this.FullSequence + "\r\n"); //full sequence
+            double? peakMonoisotopicMass = PsmTsvWriter.Resolve(_BestMatchingPeptides.Select(b => b.Pwsm.MonoisotopicMass)).ResolvedValue;
+            sb.Append("Monoisotopic Mass: " + peakMonoisotopicMass + "\r\n"); //full sequence
+            sb.Append("Comment: Parent=" + this.ScanPrecursorMonoisotopicPeakMz);
+            //this.ScanFilter.
+            //sb.Append(" Collision_energy=" + this.CollisionEnergy);
+            //var a = this.ScanFilter;
+            //if (this.ModsIdentified.Count == 0)
+            //{
+            sb.Append(" Mods=" + this.ModsIdentified.Count);
+            sb.Append(" ModString=" + this.FullSequence);
+            //}
+            //else
+            //{
+            //foreach (KeyValuePair<string, int> item in this.ModsIdentified)
+            //{
+
+            //Console.WriteLine("Key: {0}, Value: {1}", item.Key, item.Value);
+            //}
+            //}
+            //sb.Append(string.Join(Environment.NewLine, this.ModsIdentified.SelectMany(b => b.Value).GroupBy(b => b.Item2).OrderBy(b => -b.Count()).Select(b => "\t" + b.Key.IdWithMotif + "\t" + b.Count())));
+            //sb.Append("x" + this.ModsIdentified);
+            //sb.Append(" ModString=" + this.BaseSequence + "//" + this.ModsIdentified + "@" + this.BaseSequence + this.ModsIdentified.Values + "/" + this.ScanPrecursorCharge);
+            sb.Append(" iRT=" + this.ScanRetentionTime + "\r\n");
+            //var _first = test.First();
+            //Console.WriteLine(sb);
+
+            //double precursorMz = Math.Round(this.ScanPrecursorMonoisotopicPeakMz, 5);
+            //double retentionTime = Math.Round(this.ScanRetentionTime, 2);
+            //sb.Append("Comment: Observed(mz)" + precursorMz + " PrecursorCharge: " + this.ScanPrecursorCharge + " Retention Time: " + retentionTime + "\r\n");
+            sb.Append("Num Peaks: " + this.MatchedFragmentIons.Count() + "\n");
+            double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
+            foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
+            {
+                double mz = Math.Round(mfi.Mz, 5);
+                double intensity = Math.Round(mfi.Intensity / intensitySum, 3);
+                double error = Math.Round(mfi.MassErrorPpm, 1);
+                int charge = mfi.Charge;
+                sb.Append(mz + "\t" + intensity + "\t" + "\"" + mfi.NeutralTheoreticalProduct.ProductType.ToString() + mfi.NeutralTheoreticalProduct.FragmentNumber.ToString() + "/" + error + "ppm" + "\"" + "\r\n");
+                Console.WriteLine(mfi.NeutralTheoreticalProduct.ProductType);
+            }
+            return sb.ToString();
+        }
+
 
         /// <summary>
         /// This method is used by SILAC quantification to add heavy/light psms
