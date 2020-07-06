@@ -55,8 +55,8 @@ namespace Test
             
             //run task
             var x = new SearchTask();
-            
-   
+
+            x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, "normal");
             x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, spectralLibrary, "normal");
             //x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, spectralLibrary, "normal");
             //new SearchTask().RunTask(spectralLibraryTestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, "normal");
