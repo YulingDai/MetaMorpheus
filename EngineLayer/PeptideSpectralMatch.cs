@@ -1,5 +1,6 @@
 ﻿using Chemistry;
 using EngineLayer.FdrAnalysis;
+using EngineLayer.spectralLibrarySearch;
 using Proteomics;
 using Proteomics.Fragmentation;
 using Proteomics.ProteolyticDigestion;
@@ -15,6 +16,7 @@ namespace EngineLayer
     {
         public const double ToleranceForScoreDifferentiation = 1e-9;
         private List<(int Notch, PeptideWithSetModifications Pwsm)> _BestMatchingPeptides;
+       
 
         public PeptideSpectralMatch(PeptideWithSetModifications peptide, int notch, double score, int scanIndex, Ms2ScanWithSpecificMass scan, CommonParameters commonParameters, List<MatchedFragmentIon> matchedFragmentIons, double xcorr = 0)
         {
@@ -386,9 +388,31 @@ namespace EngineLayer
                 double error = Math.Round(mfi.MassErrorPpm, 1);
                 int charge = mfi.Charge;
                 sb.Append(mz + "\t" + intensity + "\t" + "\"" + mfi.NeutralTheoreticalProduct.ProductType.ToString() + mfi.NeutralTheoreticalProduct.FragmentNumber.ToString() + "/" + error + "ppm" + "\"" + "\r\n");
-                Console.WriteLine(mfi.NeutralTheoreticalProduct.ProductType);
+                //Console.WriteLine(mfi.NeutralTheoreticalProduct.ProductType);
             }
             return sb.ToString();
+        }
+
+        public Spectrum ToSpectrum()
+        {
+            var newSpectrum = new Spectrum();
+            newSpectrum.Name = this.BaseSequence;
+            newSpectrum.MW = this.PeptideMonisotopicMass;
+            newSpectrum.precursorMz = this.ScanPrecursorMonoisotopicPeakMz;
+            var peaksList = new List<PeaksInformationFromSpectrum>();
+            double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
+            foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
+            {
+                double mz = Math.Round(mfi.Mz, 5);
+                double intensity = Math.Round(mfi.Intensity / intensitySum, 3);
+                double error = Math.Round(mfi.MassErrorPpm, 1);
+                int charge = mfi.Charge;
+                var b = new PeaksInformationFromSpectrum(mz, intensity);
+                b.massErrorPpm = error;
+                peaksList.Add(b);
+            }
+            newSpectrum.Peaks = peaksList.ToArray();
+            return newSpectrum;
         }
 
 

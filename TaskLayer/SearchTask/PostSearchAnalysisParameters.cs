@@ -1,4 +1,5 @@
 ﻿using EngineLayer;
+using EngineLayer.spectralLibrarySearch;
 using FlashLFQ;
 using Proteomics;
 using Proteomics.ProteolyticDigestion;
@@ -9,6 +10,8 @@ namespace TaskLayer
     public class PostSearchAnalysisParameters
     {
         public MyTaskResults SearchTaskResults { get; set; }
+        //public SpectralLibrarySearchResults[] SpectralLibrarySearchResults { get; set; }
+        public Spectrum[] SpectralLibrary { get; set; }
         public string SearchTaskId { get; set; }
         public SearchParameters SearchParameters { get; set; }
         public List<Protein> ProteinList { get; set; }

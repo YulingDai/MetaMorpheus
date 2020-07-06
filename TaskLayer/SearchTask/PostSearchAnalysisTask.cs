@@ -3,6 +3,7 @@ using EngineLayer.FdrAnalysis;
 using EngineLayer.HistogramAnalysis;
 using EngineLayer.Localization;
 using EngineLayer.ModificationAnalysis;
+using EngineLayer.spectralLibrarySearch;
 using FlashLFQ;
 using MassSpectrometry;
 using MathNet.Numerics.Distributions;
@@ -990,7 +991,22 @@ namespace TaskLayer
             }
             peptides.RemoveAll(p => p.FdrInfo.QValue > CommonParameters.QValueOutputFilter);
 
+            var experimentalSpectrums = new List<Spectrum>();
+            foreach (var psm in peptides)
+            {
+                experimentalSpectrums.Add(psm.ToSpectrum());
+            }
+
+            var spectralSearch = new ClassicSearchOfSpectralLibrary(Parameters.SpectralLibrary, experimentalSpectrums.ToArray(), 0.05, 0.02, 5);
+            //Parameters.SpectralLibrary.ToList().ForEach(i => Console.Write("{0}\t", i));
+            experimentalSpectrums.ForEach(i => Console.Write("{0}\t", i));
+            //Console.WriteLine(Parameters.SpectralLibrary);
+            //Console.WriteLine(experimentalSpectrums.ToArray());
+            //var x = spectralSearch.SpectralLibrarySearchResults[0].SpectralLibrarayMatchs;
+
             WritePsmsToTsv(peptides, writtenFile, Parameters.SearchParameters.ModsToWriteSelection);
+            WriteSpectra(peptides, Parameters.OutputFolder);
+            WriteSpectralLibrarySearchResults(spectralSearch.SpectralLibrarySearchResults, Parameters.OutputFolder);
             FinishedWritingFile(writtenFile, new List<string> { Parameters.SearchTaskId });
 
             Parameters.SearchTaskResults.AddPsmPeptideProteinSummaryText("All target " + GlobalVariables.AnalyteType.ToLower() + "s within 1% FDR: " + peptides.Count(a => a.FdrInfo.QValue <= 0.01 && !a.IsDecoy));
@@ -1474,6 +1490,11 @@ namespace TaskLayer
             flashLFQResults.WriteResults(peaksPath, null, null, null, true);
 
             FinishedWritingFile(peaksPath, nestedIds);
+        }
+
+        protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary)
+        {
+            throw new NotImplementedException();
         }
     }
 }

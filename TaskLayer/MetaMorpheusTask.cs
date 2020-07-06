@@ -1,6 +1,7 @@
 ﻿using Chemistry;
 using EngineLayer;
 using EngineLayer.Indexing;
+using EngineLayer.spectralLibrarySearch;
 using MassSpectrometry;
 using MzLibUtil;
 using Nett;
@@ -397,6 +398,121 @@ namespace TaskLayer
             return returnParams;
         }
 
+        public MyTaskResults RunTask(string output_folder, List<DbForTask> currentProteinDbFilenameList, List<string> currentRawDataFilepathList, string spectralLibrarayPath, string displayName)
+        {
+            this.OutputFolder = output_folder;
+            DetermineAnalyteType(CommonParameters);
+            StartingSingleTask(displayName);
+
+            var tomlFileName = Path.Combine(Directory.GetParent(output_folder).ToString(), "Task Settings", displayName + "config.toml");
+            Toml.WriteFile(this, tomlFileName, tomlConfig);
+            FinishedWritingFile(tomlFileName, new List<string> { displayName });
+
+            FileSpecificParameters = new List<(string FileName, CommonParameters Parameters)>();
+
+            MetaMorpheusEngine.FinishedSingleEngineHandler += SingleEngineHandlerInTask;
+
+            spectralLibraryReader spectralLibraryReader = new spectralLibraryReader(spectralLibrarayPath);
+            Spectrum[] spectralLibrary = spectralLibraryReader.spectrums;
+            Console.WriteLine(spectralLibrary.Length);
+            try
+            {
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+
+                FileSpecificParameters[] fileSettingsList = new FileSpecificParameters[currentRawDataFilepathList.Count];
+                for (int i = 0; i < currentRawDataFilepathList.Count; i++)
+                {
+                    if (GlobalVariables.StopLoops) { break; }
+                    string rawFilePath = currentRawDataFilepathList[i];
+                    string directory = Directory.GetParent(rawFilePath).ToString();
+                    string fileSpecificTomlPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(rawFilePath)) + ".toml";
+                    if (File.Exists(fileSpecificTomlPath))
+                    {
+                        try
+                        {
+                            TomlTable fileSpecificSettings = Toml.ReadFile(fileSpecificTomlPath, tomlConfig);
+                            fileSettingsList[i] = new FileSpecificParameters(fileSpecificSettings);
+                            FileSpecificParameters.Add((currentRawDataFilepathList[i], SetAllFileSpecificCommonParams(CommonParameters, fileSettingsList[i])));
+                        }
+                        catch (MetaMorpheusException e)
+                        {
+                            //file - specific toml has already been validated in the GUI when the spectra files were added, so...
+                            // probably the only time you can get here is if the user modifies the file-specific parameter file in the middle of a run...
+                            Warn("Problem parsing the file-specific toml " + Path.GetFileName(fileSpecificTomlPath) + "; " + e.Message + "; is the toml from an older version of MetaMorpheus?");
+                        }
+                        catch (KeyNotFoundException e)
+                        {
+                            Warn("Problem parsing the file-specific toml " + Path.GetFileName(fileSpecificTomlPath) + "; " + e.Message + "; please update the proteases.tsv file and restart MetaMorpheus to use this file-specific toml.");
+                        }
+                    }
+                    else // just used common parameters for file specific.
+                    {
+                        FileSpecificParameters.Add((currentRawDataFilepathList[i], CommonParameters));
+                    }
+                }
+
+                RunSpecific(output_folder, currentProteinDbFilenameList, currentRawDataFilepathList, displayName, fileSettingsList, spectralLibrary);
+               
+                //Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
+                //spectralLibraryReader experimentalSpectrumsReader = new spectralLibraryReader(experimentalSpectrums);
+                //Spectrum[] experimentalProcessedSpectrums = experimentalSpectrumsReader.spectrums;
+                //Console.WriteLine(experimentalProcessedSpectrums.Length);
+                //ClassicSearchOfSpectralLibrary search = new ClassicSearchOfSpectralLibrary(spectralLibrary, experimentalProcessedSpectrums, 0.05, 0.02, 5);
+                stopWatch.Stop();
+                MyTaskResults.Time = stopWatch.Elapsed;
+                var resultsFileName = Path.Combine(output_folder, "results.txt");
+                using (StreamWriter file = new StreamWriter(resultsFileName))
+                {
+                    file.WriteLine("MetaMorpheus: version " + GlobalVariables.MetaMorpheusVersion);
+                    file.Write(MyTaskResults.ToString());
+                }
+                FinishedWritingFile(resultsFileName, new List<string> { displayName });
+                FinishedSingleTask(displayName);
+            }
+            catch (Exception e)
+            {
+                MetaMorpheusEngine.FinishedSingleEngineHandler -= SingleEngineHandlerInTask;
+                var resultsFileName = Path.Combine(output_folder, "results.txt");
+                e.Data.Add("folder", output_folder);
+                using (StreamWriter file = new StreamWriter(resultsFileName))
+                {
+                    file.WriteLine(GlobalVariables.MetaMorpheusVersion.Equals("1.0.0.0") ? "MetaMorpheus: Not a release version" : "MetaMorpheus: version " + GlobalVariables.MetaMorpheusVersion);
+                    file.WriteLine(SystemInfo.CompleteSystemInfo()); //OS, OS Version, .Net Version, RAM, processor count, MSFileReader .dll versions X3
+                    file.Write("e: " + e);
+                    file.Write("e.Message: " + e.Message);
+                    file.Write("e.InnerException: " + e.InnerException);
+                    file.Write("e.Source: " + e.Source);
+                    file.Write("e.StackTrace: " + e.StackTrace);
+                    file.Write("e.TargetSite: " + e.TargetSite);
+                }
+                throw;
+            }
+
+            {
+                var proseFilePath = Path.Combine(output_folder, "prose.txt");
+                using (StreamWriter file = new StreamWriter(proseFilePath))
+                {
+                    file.WriteLine("The data analysis was performed using MetaMorpheus version " + GlobalVariables.MetaMorpheusVersion + ", available at " + "https://github.com/smith-chem-wisc/MetaMorpheus.");
+                    file.Write(ProseCreatedWhileRunning.ToString());
+                    file.WriteLine(SystemInfo.SystemProse().Replace(Environment.NewLine, "") + " ");
+                    file.WriteLine("The total time to perform the " + TaskType + " task on " + currentRawDataFilepathList.Count + " spectra file(s) was " + String.Format("{0:0.00}", MyTaskResults.Time.TotalMinutes) + " minutes.");
+                    file.WriteLine();
+                    file.WriteLine("Published works using MetaMorpheus software are encouraged to cite: Solntsev, S. K.; Shortreed, M. R.; Frey, B. L.; Smith, L. M. Enhanced Global Post-translational Modification Discovery with MetaMorpheus. Journal of Proteome Research. 2018, 17 (5), 1844-1851.");
+
+                    file.WriteLine();
+                    file.WriteLine("Spectra files: ");
+                    file.WriteLine(string.Join(Environment.NewLine, currentRawDataFilepathList.Select(b => '\t' + b)));
+                    file.WriteLine("Databases:");
+                    file.Write(string.Join(Environment.NewLine, currentProteinDbFilenameList.Select(b => '\t' + (b.IsContaminant ? "Contaminant " : "") + b.FilePath)));
+                }
+                FinishedWritingFile(proseFilePath, new List<string> { displayName });
+            }
+
+            MetaMorpheusEngine.FinishedSingleEngineHandler -= SingleEngineHandlerInTask;
+            return MyTaskResults;
+        }
+
         public MyTaskResults RunTask(string output_folder, List<DbForTask> currentProteinDbFilenameList, List<string> currentRawDataFilepathList, string displayName)
         {
             this.OutputFolder = output_folder;
@@ -410,6 +526,7 @@ namespace TaskLayer
             FileSpecificParameters = new List<(string FileName, CommonParameters Parameters)>();
 
             MetaMorpheusEngine.FinishedSingleEngineHandler += SingleEngineHandlerInTask;
+
             try
             {
                 var stopWatch = new Stopwatch();
@@ -580,11 +697,46 @@ namespace TaskLayer
             }
         }
 
+        protected static void WriteSpectra(IEnumerable<PeptideSpectralMatch> psms, string outputFolder)
+        {
+            string spectrumFilePath = outputFolder + "\\spectralLibrary.msp";
+            using (StreamWriter output = new StreamWriter(spectrumFilePath))
+            {
+
+                foreach (var psm in psms)
+                {
+                    output.WriteLine(psm.Spectrum());
+                }
+            }
+        }
+
+        protected static void WriteSpectralLibrarySearchResults(SpectralLibrarySearchResults[] spectralLibrarySearchs, string outputFolder)
+        {
+            string spectralLibrarySearchResults = outputFolder + "\\spectralLibrarySearchResults.msp";
+           
+            using (StreamWriter output = new StreamWriter(spectralLibrarySearchResults))
+            {
+                foreach (var x in spectralLibrarySearchs)
+                {
+                    output.WriteLine("Experimental spectrum name: " + x.TheExperimentalSpectrum.Name);
+                    foreach (SpectralLibrarayMatch A in x.SpectralLibrarayMatchs)
+                    {
+                        output.WriteLine("Matched score: " + A.MatchScore );
+                        output.WriteLine("Spectral Library search results: ");
+                        output.WriteLine(A.MatchedSpectrumFromLibrary.ToString());
+                        //output.WriteLine(A.MatchedSpectrumFromLibrary.precursorMz);
+                       
+                    }
+                }
+            }
+        }
+
         protected void ReportProgress(ProgressEventArgs v)
         {
             OutProgressHandler?.Invoke(this, v);
         }
 
+        protected abstract MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary);
         protected abstract MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList);
 
         protected void FinishedWritingFile(string path, List<string> nestedIDs)

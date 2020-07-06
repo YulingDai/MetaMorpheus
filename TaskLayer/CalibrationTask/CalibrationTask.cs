@@ -2,6 +2,7 @@ using EngineLayer;
 using EngineLayer.Calibration;
 using EngineLayer.ClassicSearch;
 using EngineLayer.FdrAnalysis;
+using EngineLayer.spectralLibrarySearch;
 using IO.MzML;
 using MassSpectrometry;
 using MzLibUtil;
@@ -272,7 +273,7 @@ namespace TaskLayer
             allPsms = allPsms.OrderByDescending(b => b.Score)
                 .ThenBy(b => b.PeptideMonisotopicMass.HasValue ? Math.Abs(b.ScanPrecursorMass - b.PeptideMonisotopicMass.Value) : double.MaxValue)
                 .GroupBy(b => (b.FullFilePath, b.ScanNumber, b.PeptideMonisotopicMass)).Select(b => b.First()).ToList();
-            
+
             new FdrAnalysisEngine(allPsms, searchMode.NumNotches, CommonParameters, FileSpecificParameters, new List<string> { taskId, "Individual Spectra Files", fileNameWithoutExtension }).Run();
 
             List<PeptideSpectralMatch> goodIdentifications = allPsms.Where(b => b.FdrInfo.QValueNotch < 0.001 && !b.IsDecoy && b.FullSequence != null).ToList();
@@ -285,7 +286,7 @@ namespace TaskLayer
             //get the deconvoluted ms2scans for the good identifications
             List<Ms2ScanWithSpecificMass> goodScans = new List<Ms2ScanWithSpecificMass>();
             List<PeptideSpectralMatch> unfilteredPsms = allPsmsArray.ToList();
-            foreach(PeptideSpectralMatch psm in goodIdentifications)
+            foreach (PeptideSpectralMatch psm in goodIdentifications)
             {
                 goodScans.Add(listOfSortedms2Scans[unfilteredPsms.IndexOf(psm)]);
             }
@@ -341,6 +342,11 @@ namespace TaskLayer
             }
 
             File.WriteAllLines(Path.Combine(outputFolder, GlobalVariables.ExperimentalDesignFileName), newExperimentalDesignOutput);
+        }
+
+        protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace EngineLayer.spectralLibrarySearch
     {
         public double Mz { get; set; }
         public double Intensity { get; set; }
-        public SpectrumPeakProductType SpectrumPeakProductType { get; set; }
+        public string  SpectrumPeakProductType { get; set; }
         public int fragmentNumber { get; set; }
         public double massErrorPpm { get; set; }
 

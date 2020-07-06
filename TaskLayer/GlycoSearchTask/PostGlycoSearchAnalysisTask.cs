@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EngineLayer.spectralLibrarySearch;
 
 namespace TaskLayer
 {
@@ -104,6 +105,10 @@ namespace TaskLayer
 
         }
 
+        protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

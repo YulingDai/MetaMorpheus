@@ -11,6 +11,7 @@ using System.Linq;
 using MzLibUtil;
 using EngineLayer.FdrAnalysis;
 using System;
+using EngineLayer.spectralLibrarySearch;
 
 namespace TaskLayer
 {
@@ -23,7 +24,7 @@ namespace TaskLayer
                 minPeptideLength: 5,
                 maxPeptideLength: 60
 
-            );
+         );
             CommonParameters = new CommonParameters(
                 precursorMassTolerance: new PpmTolerance(10),
                 ms2childScanDissociationType: DissociationType.EThcD,
@@ -224,5 +225,9 @@ namespace TaskLayer
             return glycos;
         }
 
+        protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

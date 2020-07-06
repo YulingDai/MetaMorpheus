@@ -142,6 +142,15 @@ namespace EngineLayer.spectralLibrarySearch
                             var b = new PeaksInformationFromSpectrum(double.Parse(eachPeak[0]), double.Parse(eachPeak[1]));
                  
                             string[] by = eachPeak[2].Split(new char[] { '/', '\"', 'p'}, StringSplitOptions.RemoveEmptyEntries).Select(b => b.Trim()).ToArray();
+                            //Console.WriteLine(by[0]);
+                            //Console.WriteLine(by[1]);
+                            //Console.WriteLine(by[2]);
+                            //Console.WriteLine(by[0].ToCharArray()[0]);
+                            //Console.WriteLine(by[0].ToCharArray()[1]);
+                            b.SpectrumPeakProductType = by[0].ToCharArray()[0].ToString();
+                            b.fragmentNumber = (int)Char.GetNumericValue(by[0].ToCharArray()[1]);
+                            //Console.WriteLine(by[0].ToCharArray()[1]);
+                            //Console.WriteLine(b.fragmentNumber);
                             b.massErrorPpm = double.Parse(by[1].Trim());
                             peaksList.Add(b);
                         }

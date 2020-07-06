@@ -20,7 +20,7 @@ namespace Test
         public static void SpectralReaderTest()
         {
             string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
-            string spectral= Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectrumsToSearch.msp");
+            string spectral= Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
             spectralLibraryReader x = new spectralLibraryReader(spectralLibrary);
 
             spectralLibraryReader y = new spectralLibraryReader(spectral);

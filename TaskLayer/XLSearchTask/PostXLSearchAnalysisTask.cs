@@ -1,6 +1,7 @@
 ﻿using EngineLayer;
 using EngineLayer.CrosslinkSearch;
 using EngineLayer.FdrAnalysis;
+using EngineLayer.spectralLibrarySearch;
 using Proteomics;
 using System;
 using System.Collections.Generic;
@@ -177,6 +178,11 @@ namespace TaskLayer
 
                 csm.SetFdrValues(cumulativeTarget, cumulativeDecoy, qValue, 0, 0, qValueNotch, pep, pepQValue);
             }
+        }
+
+        protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary)
+        {
+            throw new NotImplementedException();
         }
     }
 }

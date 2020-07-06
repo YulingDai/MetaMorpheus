@@ -22,12 +22,13 @@ namespace EngineLayer.spectralLibrarySearch
         public override string ToString()
         {
             StringBuilder spectrum = new StringBuilder();
-            spectrum.Append("Name: " + Name);
+            spectrum.Append("Name: " + Name + "\r\n");
             spectrum.Append("precursor: " + precursorMz);
+            spectrum.Append("Matched peaks number : " + this.Peaks.Length + "\r\n");
             foreach (PeaksInformationFromSpectrum eachPeak in this.Peaks)
             {
 
-                spectrum.Append(eachPeak.Mz + "\t" + eachPeak.Intensity + "\t");
+                spectrum.Append(eachPeak.Mz + "\t" + eachPeak.Intensity  + "\t" + eachPeak.SpectrumPeakProductType + eachPeak.fragmentNumber + "\r\n");
            
             }
 

@@ -1,4 +1,5 @@
 ﻿using EngineLayer;
+using EngineLayer.spectralLibrarySearch;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,11 @@ namespace Test
             {
                 LoadProteins("", dbFilenameList, true, DecoyType.None, new List<string>(), new CommonParameters());
                 return null;
+            }
+
+            protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary)
+            {
+                throw new NotImplementedException();
             }
         }
     }
