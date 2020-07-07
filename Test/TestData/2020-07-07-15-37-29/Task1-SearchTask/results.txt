@@ -1,10 +1,5 @@
 MetaMorpheus: version Not a release version. DEBUG.
-Total time: 00:00:04.5814248
-
-
-
-
-Time to run task: 00:00:04.3789381
+Time to run task: 00:00:04.5189269
 
 
 --------------------------------------------------
@@ -29,17 +24,17 @@ Target peptides within 1% FDR in SmallCalibratible_Yeast: 49
 Engine Results:
 
 Engine type: ClassicSearchEngine
-Time to run engine: 00:00:00.5105321
+Time to run engine: 00:00:00.7787081
 
 Engine type: FdrAnalysisEngine
-Time to run engine: 00:00:00.0198676
+Time to run engine: 00:00:00.0191053
 PSMs within 1% FDR: 73
 Delta Score Used for FDR Analysis: False
 
 
 
 Engine type: ModificationAnalysisEngine
-Time to run engine: 00:00:00.0258492
+Time to run engine: 00:00:00.0285769
 Localized mods seen below q-value 0.01:
 	Carbamidomethyl on C	1
 	Oxidation on M	1
@@ -55,29 +50,28 @@ All mods in database limited to peptides observed in the results:
 
 
 Engine type: ProteinParsimonyEngine
-Time to run engine: 00:00:00.0641272
+Time to run engine: 00:00:00.0887526
 
 
 Engine type: ProteinScoringAndFdrEngine
-Time to run engine: 00:00:00.0336191
+Time to run engine: 00:00:00.0287909
 Number of proteins within 1% FDR: 41
 
 Engine type: ProteinScoringAndFdrEngine
-Time to run engine: 00:00:00.0020377
+Time to run engine: 00:00:00.0019559
 Number of proteins within 1% FDR: 41
 
 Engine type: FdrAnalysisEngine
-Time to run engine: 00:00:00.0046884
+Time to run engine: 00:00:00.0046050
 Peptides within 1% FDR: 49
 Delta Score Used for FDR Analysis: False
 
 
 
 Engine type: FdrAnalysisEngine
-Time to run engine: 00:00:00.0002275
+Time to run engine: 00:00:00.0001262
 Peptides within 1% FDR: 49
 Delta Score Used for FDR Analysis: False
-
 
 
 

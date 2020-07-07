@@ -358,7 +358,7 @@ namespace EngineLayer
             //var a = this.ScanFilter;
             //if (this.ModsIdentified.Count == 0)
             //{
-            sb.Append(" Mods=" + this.ModsIdentified.Count);
+            //sb.Append(" Mods=" + this.ModsIdentified.Count);
             sb.Append(" ModString=" + this.FullSequence);
             //}
             //else
