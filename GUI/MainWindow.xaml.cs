@@ -524,6 +524,7 @@ namespace MetaMorpheusGUI
 
                 case ".xml":
                 case ".fasta":
+                case ".msp":
                 case ".fa":
                     ProteinDbForDataGrid uu = new ProteinDbForDataGrid(draggedFilePath);
                     if (!DatabaseExists(ProteinDbObservableCollection, uu))
@@ -715,7 +716,7 @@ namespace MetaMorpheusGUI
             // everything is OK to run
             EverythingRunnerEngine a = new EverythingRunnerEngine(DynamicTasksObservableCollection.Select(b => (b.DisplayName, b.Task)).ToList(),
                 SpectraFilesObservableCollection.Where(b => b.Use).Select(b => b.FilePath).ToList(),
-                ProteinDbObservableCollection.Where(b => b.Use).Select(b => new DbForTask(b.FilePath, b.Contaminant)).ToList(),
+                ProteinDbObservableCollection.Where(b => b.Use).Select(b => new DbForTask(b.FilePath, b.Contaminant, b.SpectralLibrary)).ToList(),
                 outputFolder);
 
             var t = new Task(a.Run);

@@ -16,6 +16,12 @@ namespace MetaMorpheusGUI
             {
                 Contaminant = true;
             }
+
+            if (FilePath.ToUpperInvariant().Contains("msp".ToUpperInvariant())
+               || FilePath.ToUpperInvariant().Contains("library".ToUpperInvariant()))
+            {
+                SpectralLibrary = true;
+            }
             FileName = Path.GetFileName(FilePath);
         }
 
@@ -25,6 +31,7 @@ namespace MetaMorpheusGUI
             Contaminant = uu.IsContaminant;
             FilePath = uu.FilePath;
             FileName = uu.FileName;
+            SpectralLibrary = uu.IsSpectralLibrary;
         }
 
         #endregion Public Constructors
@@ -33,6 +40,7 @@ namespace MetaMorpheusGUI
 
         public bool Use { get; set; }
         public bool Contaminant { get; set; }
+        public bool SpectralLibrary { get; set; }
         public string FileName { get; private set; }
         public string FilePath { get; private set; }
         public bool InProgress { get; private set; }

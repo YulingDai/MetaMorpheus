@@ -1490,9 +1490,6 @@ namespace TaskLayer
             FinishedWritingFile(peaksPath, nestedIds);
         }
 
-        protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList, Spectrum[] spectralLibrary)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }

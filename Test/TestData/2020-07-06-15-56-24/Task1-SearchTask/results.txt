@@ -1,0 +1,25 @@
+MetaMorpheus: version Not a release version. DEBUG.
+Data files were processed on a computer running Microsoft Windows 10.0.17763 with a 64-bit Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz processor with 40 threads and 128GB installed RAM.
+.NET version: .NET Core 3.1.2
+e: System.Xml.XmlException: Data at the root level is invalid. Line 1, position 1.
+   at System.Xml.XmlTextReaderImpl.Throw(Exception e)
+   at System.Xml.XmlTextReaderImpl.Throw(String res, String arg)
+   at System.Xml.XmlTextReaderImpl.ParseRootLevelWhitespace()
+   at System.Xml.XmlTextReaderImpl.ParseDocumentContent()
+   at System.Xml.XmlTextReaderImpl.Read()
+   at UsefulProteomicsDatabases.ProteinDbLoader.GetPtmListFromProteinXml(String proteinDbLocation)
+   at UsefulProteomicsDatabases.ProteinDbLoader.LoadProteinXML(String proteinDbLocation, Boolean generateTargets, DecoyType decoyType, IEnumerable`1 allKnownModifications, Boolean isContaminant, IEnumerable`1 modTypesToExclude, Dictionary`2& unknownModifications, Int32 maxThreads, Int32 maxHeterozygousVariants, Int32 minAlleleDepth)
+   at TaskLayer.MetaMorpheusTask.LoadProteinDb(String fileName, Boolean generateTargets, DecoyType decoyType, List`1 localizeableModificationTypes, Boolean isContaminant, Dictionary`2& um, Int32& emptyEntriesCount, CommonParameters commonParameters) in G:\MetaMorpheus\TaskLayer\MetaMorpheusTask.cs:line 679
+   at TaskLayer.MetaMorpheusTask.LoadProteins(String taskId, List`1 dbFilenameList, Boolean searchTarget, DecoyType decoyType, List`1 localizeableModificationTypes, CommonParameters commonParameters) in G:\MetaMorpheus\TaskLayer\MetaMorpheusTask.cs:line 643
+   at TaskLayer.SearchTask.RunSpecific(String OutputFolder, List`1 dbFilenameList, List`1 currentRawFileList, String taskId, FileSpecificParameters[] fileSettingsList) in G:\MetaMorpheus\TaskLayer\SearchTask\SearchTask.cs:line 141
+   at TaskLayer.MetaMorpheusTask.RunTask(String output_folder, List`1 currentProteinDbFilenameList, List`1 currentRawDataFilepathList, String displayName) in G:\MetaMorpheus\TaskLayer\MetaMorpheusTask.cs:line 464e.Message: Data at the root level is invalid. Line 1, position 1.e.InnerException: e.Source: System.Private.Xmle.StackTrace:    at System.Xml.XmlTextReaderImpl.Throw(Exception e)
+   at System.Xml.XmlTextReaderImpl.Throw(String res, String arg)
+   at System.Xml.XmlTextReaderImpl.ParseRootLevelWhitespace()
+   at System.Xml.XmlTextReaderImpl.ParseDocumentContent()
+   at System.Xml.XmlTextReaderImpl.Read()
+   at UsefulProteomicsDatabases.ProteinDbLoader.GetPtmListFromProteinXml(String proteinDbLocation)
+   at UsefulProteomicsDatabases.ProteinDbLoader.LoadProteinXML(String proteinDbLocation, Boolean generateTargets, DecoyType decoyType, IEnumerable`1 allKnownModifications, Boolean isContaminant, IEnumerable`1 modTypesToExclude, Dictionary`2& unknownModifications, Int32 maxThreads, Int32 maxHeterozygousVariants, Int32 minAlleleDepth)
+   at TaskLayer.MetaMorpheusTask.LoadProteinDb(String fileName, Boolean generateTargets, DecoyType decoyType, List`1 localizeableModificationTypes, Boolean isContaminant, Dictionary`2& um, Int32& emptyEntriesCount, CommonParameters commonParameters) in G:\MetaMorpheus\TaskLayer\MetaMorpheusTask.cs:line 679
+   at TaskLayer.MetaMorpheusTask.LoadProteins(String taskId, List`1 dbFilenameList, Boolean searchTarget, DecoyType decoyType, List`1 localizeableModificationTypes, CommonParameters commonParameters) in G:\MetaMorpheus\TaskLayer\MetaMorpheusTask.cs:line 643
+   at TaskLayer.SearchTask.RunSpecific(String OutputFolder, List`1 dbFilenameList, List`1 currentRawFileList, String taskId, FileSpecificParameters[] fileSettingsList) in G:\MetaMorpheus\TaskLayer\SearchTask\SearchTask.cs:line 141
+   at TaskLayer.MetaMorpheusTask.RunTask(String output_folder, List`1 currentProteinDbFilenameList, List`1 currentRawDataFilepathList, String displayName) in G:\MetaMorpheus\TaskLayer\MetaMorpheusTask.cs:line 464e.TargetSite: Void Throw(System.Exception)
