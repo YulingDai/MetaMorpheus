@@ -55,7 +55,7 @@ namespace EngineLayer.spectralLibrarySearch
                     {
                         try 
                         {
-                            string[] name = lines[j].Split(new char[] { ':', '=' }).Select(b => b.Trim()).ToArray();
+                            string[] name = lines[j].Split(new char[] { ':', '=' }, 2).Select(b => b.Trim()).ToArray();
                             singleSpectrum.Name = name[1];
                         }
                         catch(Exception e)
@@ -76,7 +76,7 @@ namespace EngineLayer.spectralLibrarySearch
                         catch(Exception e)
                         {
                             singleSpectrum.MW = null;
-                            throw new MetaMorpheusException("Could not find the MW : " + e.Message);
+                            //throw new MetaMorpheusException("Could not find the MW : " + e.Message);
                         }
                     }
 
@@ -123,10 +123,10 @@ namespace EngineLayer.spectralLibrarySearch
                                     singleSpectrum.rententionTime = double.Parse(rententionTime[1]);
                                 }
                             }
-                            catch (Exception e)
+                            catch
                             {
                                 singleSpectrum.rententionTime = null;
-                                throw new MetaMorpheusException("Could not find the mz of rentention time : " + e.Message);
+                                //throw new MetaMorpheusException("Could not find the mz of rentention time : " + e.Message);
                             }
                         }
                     }

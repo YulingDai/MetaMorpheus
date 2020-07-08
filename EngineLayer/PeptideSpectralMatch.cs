@@ -396,7 +396,7 @@ namespace EngineLayer
         public Spectrum ToSpectrum()
         {
             var newSpectrum = new Spectrum();
-            newSpectrum.Name = this.BaseSequence;
+            newSpectrum.Name = this.FullSequence;
             newSpectrum.MW = this.PeptideMonisotopicMass;
             newSpectrum.precursorMz = this.ScanPrecursorMonoisotopicPeakMz;
             var peaksList = new List<PeaksInformationFromSpectrum>();
