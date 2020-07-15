@@ -84,6 +84,15 @@ namespace TaskLayer
 
         protected override MyTaskResults RunSpecific(string OutputFolder, List<DbForTask> dbFilenameList, List<string> currentRawFileList, string taskId, FileSpecificParameters[] fileSettingsList)
         {
+            Dictionary<String,Spectrum> spectralLibrary = null;
+            foreach (var file in dbFilenameList)
+            {
+                if (file.IsSpectralLibrary == true)
+                {
+                    spectralLibraryReader spectralLibraryReader = new spectralLibraryReader(file.FilePath);
+                    spectralLibrary = spectralLibraryReader.SpectralLibraryDictionary;
+                }
+            }
             if (SearchParameters.DoQuantification)
             {
                 // disable quantification if a .mgf is being used
@@ -333,9 +342,12 @@ namespace TaskLayer
                 else
                 {
                     Status("Starting search...", thisId);
-                    new ClassicSearchEngine(fileSpecificPsms, arrayOfMs2ScansSortedByMass, variableModifications, fixedModifications, SearchParameters.SilacLabels,
-                        SearchParameters.StartTurnoverLabel, SearchParameters.EndTurnoverLabel, proteinList, massDiffAcceptor, combinedParams, this.FileSpecificParameters, thisId).Run();
-
+                    Console.WriteLine(10012);
+                    var newClassicSearchEngine = new ClassicSearchEngine(fileSpecificPsms, arrayOfMs2ScansSortedByMass, variableModifications, fixedModifications, SearchParameters.SilacLabels,
+                        SearchParameters.StartTurnoverLabel, SearchParameters.EndTurnoverLabel, proteinList, massDiffAcceptor, combinedParams, this.FileSpecificParameters, thisId);
+                    newClassicSearchEngine.SpectralLibraryDictionary = spectralLibrary;
+                    newClassicSearchEngine.Run();
+                  
                     ReportProgress(new ProgressEventArgs(100, "Done with search!", thisId));
                 }
 
@@ -372,20 +384,12 @@ namespace TaskLayer
             //}
             //var spectralSearch = new ClassicSearchOfSpectralLibrary(spectralLibrary, experimentalSpectrums.ToArray(), 0.05, 0.02, 5);
 
-            Spectrum[] spectralLibrary = null;
-            foreach (var file in dbFilenameList)
-            {
-                if (file.IsSpectralLibrary == true)
-                {
-                    spectralLibraryReader spectralLibraryReader = new spectralLibraryReader(file.FilePath);
-                    spectralLibrary = spectralLibraryReader.spectrums;
-                }
-            }
+            
 
             PostSearchAnalysisParameters parameters = new PostSearchAnalysisParameters
             {
                 SearchTaskResults = MyTaskResults,
-                SpectralLibrary = spectralLibrary,
+                //SpectralLibrary = spectralLibrary,
                 //SpectralLibrarySearchResults = spectralSearch.SpectralLibrarySearchResults,
                 SearchTaskId = taskId,
                 SearchParameters = SearchParameters,

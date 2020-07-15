@@ -1,4 +1,5 @@
 ﻿using Chemistry;
+using EngineLayer.spectralLibrarySearch;
 using MassSpectrometry;
 using System;
 using System.Collections.Generic;
@@ -154,5 +155,27 @@ namespace EngineLayer
             return index - 1;
 
         }
+
+        //public Spectrum ToSpectrum()
+        //{
+        //    var newSpectrum = new Spectrum();
+        //    //newSpectrum.Name = this.FullSequence;
+        //    newSpectrum.MW = this.PeptideMonisotopicMass;
+        //    newSpectrum.precursorMz = this.PrecursorMonoisotopicPeakMz;
+        //    var peaksList = new List<PeaksInformationFromSpectrum>();
+        //    double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
+        //    foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
+        //    {
+        //        double mz = Math.Round(mfi.Mz, 5);
+        //        double intensity = Math.Round(mfi.Intensity / intensitySum, 3);
+        //        double error = Math.Round(mfi.MassErrorPpm, 1);
+        //        int charge = mfi.Charge;
+        //        var b = new PeaksInformationFromSpectrum(mz, intensity);
+        //        b.massErrorPpm = error;
+        //        peaksList.Add(b);
+        //    }
+        //    newSpectrum.Peaks = peaksList.ToArray();
+        //    return newSpectrum;
+        //}
     }
 }

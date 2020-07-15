@@ -1,4 +1,5 @@
-﻿using MzLibUtil;
+﻿using EngineLayer.spectralLibrarySearch;
+using MzLibUtil;
 using Proteomics;
 using Proteomics.Fragmentation;
 using Proteomics.ProteolyticDigestion;
@@ -21,6 +22,8 @@ namespace EngineLayer.ClassicSearch
         private readonly Ms2ScanWithSpecificMass[] ArrayOfSortedMS2Scans;
         private readonly double[] MyScanPrecursorMasses;
 
+        public  Dictionary<String, Spectrum> SpectralLibraryDictionary { get; set; }
+
         public ClassicSearchEngine(PeptideSpectralMatch[] globalPsms, Ms2ScanWithSpecificMass[] arrayOfSortedMS2Scans,
             List<Modification> variableModifications, List<Modification> fixedModifications, List<SilacLabel> silacLabels, SilacLabel startLabel, SilacLabel endLabel, 
             List<Protein> proteinList, MassDiffAcceptor searchMode, CommonParameters commonParameters, List<(string FileName, CommonParameters Parameters)> fileSpecificParameters, List<string> nestedIds)
@@ -39,6 +42,8 @@ namespace EngineLayer.ClassicSearch
             Proteins = proteinList;
             SearchMode = searchMode;
         }
+
+   
 
         protected override MetaMorpheusEngineResults RunSpecific()
         {
@@ -68,24 +73,25 @@ namespace EngineLayer.ClassicSearch
                     {
                         // Stop loop if canceled
                         if (GlobalVariables.StopLoops) { return; }
+                        //Console.WriteLine(Proteins[i].Digest(CommonParameters.DigestionParams, FixedModifications, VariableModifications, SilacLabels, TurnoverLabels).ToArray().Length);
 
                         // digest each protein into peptides and search for each peptide in all spectra within precursor mass tolerance
                         foreach (PeptideWithSetModifications peptide in Proteins[i].Digest(CommonParameters.DigestionParams, FixedModifications, VariableModifications, SilacLabels, TurnoverLabels))
                         {
-                            peptide.Fragment(CommonParameters.DissociationType, CommonParameters.DigestionParams.FragmentationTerminus, peptideTheorProducts);
 
+                            peptide.Fragment(CommonParameters.DissociationType, CommonParameters.DigestionParams.FragmentationTerminus, peptideTheorProducts);
+                           
                             foreach (ScanWithIndexAndNotchInfo scan in GetAcceptableScans(peptide.MonoisotopicMass, SearchMode))
                             {
                                 List<MatchedFragmentIon> matchedIons = MatchFragmentIons(scan.TheScan, peptideTheorProducts, CommonParameters);
-
                                 double thisScore = CalculatePeptideScore(scan.TheScan.TheScan, matchedIons);
-
                                 bool meetsScoreCutoff = thisScore >= CommonParameters.ScoreCutoff;
 
                                 // this is thread-safe because even if the score improves from another thread writing to this PSM,
                                 // the lock combined with AddOrReplace method will ensure thread safety
                                 if (meetsScoreCutoff)
                                 {
+
                                     // valid hit (met the cutoff score); lock the scan to prevent other threads from accessing it
                                     lock (myLocks[scan.ScanIndex])
                                     {
@@ -104,6 +110,53 @@ namespace EngineLayer.ClassicSearch
                                         }
                                     }
                                 }
+
+                                if (SpectralLibraryDictionary != null)
+                                {
+                                    try
+                                    {
+                                        double thisSpectrumMatchScore = CalculatePeptideScore(scan.TheScan.TheScan, SpectralLibraryDictionary[peptide.FullSequence].Peaks);
+                                        bool meetSpectrumScoreCutoff = thisSpectrumMatchScore >= CommonParameters.ScoreCutoff;
+                                        if (meetSpectrumScoreCutoff)
+                                        {
+                                            // valid hit (met the cutoff score); lock the scan to prevent other threads from accessing it
+                                            lock (myLocks[scan.ScanIndex])
+                                            {
+                                                bool scoreImprovement = PeptideSpectralMatches[scan.ScanIndex] == null || (thisSpectrumMatchScore - PeptideSpectralMatches[scan.ScanIndex].RunnerUpScore) > -PeptideSpectralMatch.ToleranceForScoreDifferentiation;
+
+                                                if (scoreImprovement)
+                                                {
+                                                    if (PeptideSpectralMatches[scan.ScanIndex] == null)
+                                                    {
+                                                        PeptideSpectralMatches[scan.ScanIndex] = new PeptideSpectralMatch(peptide, scan.Notch, thisSpectrumMatchScore, scan.ScanIndex, scan.TheScan, CommonParameters, SpectralLibraryDictionary[peptide.FullSequence].Peaks, 0);
+                                                        PeptideSpectralMatches[scan.ScanIndex].Score = thisScore;
+                                                        PeptideSpectralMatches[scan.ScanIndex].ThisSpectrumMatchScore = thisSpectrumMatchScore;
+                                                    }
+                                                    else
+                                                    {
+                                                        PeptideSpectralMatches[scan.ScanIndex].AddOrReplace(peptide, thisSpectrumMatchScore, scan.Notch, CommonParameters.ReportAllAmbiguity, SpectralLibraryDictionary[peptide.FullSequence].Peaks, 0);                               
+                                                    }
+                                                }
+
+                                                if (thisScore > thisSpectrumMatchScore)
+                                                {
+                                                    PeptideSpectralMatches[scan.ScanIndex] = new PeptideSpectralMatch(peptide, scan.Notch, thisScore, scan.ScanIndex, scan.TheScan, CommonParameters, matchedIons, 0);
+                                                    PeptideSpectralMatches[scan.ScanIndex].ThisSpectrumMatchScore = thisSpectrumMatchScore;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        if (e.Message.Contains("The given key", StringComparison.OrdinalIgnoreCase) && e.Message.Contains("was not present in the dictionary", StringComparison.OrdinalIgnoreCase))
+                                        { }
+                                        else
+                                        {
+                                            throw new Exception(e.Message);
+                                        }
+                                    }
+                                }
+              
                             }
                         }
 
@@ -124,7 +177,6 @@ namespace EngineLayer.ClassicSearch
             {
                 psm.ResolveAllAmbiguities();
             }
-
             return new MetaMorpheusEngineResults(this);
         }
 

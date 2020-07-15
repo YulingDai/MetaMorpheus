@@ -1,4 +1,5 @@
 ﻿using Chemistry;
+using EngineLayer.spectralLibrarySearch;
 using MassSpectrometry;
 using Proteomics.Fragmentation;
 using System;
@@ -76,6 +77,16 @@ namespace EngineLayer
 
             return score;
         }
+
+        //public static double CalculateSpectrumMatchScore(MsDataScan thisScan, PeaksInformationFromSpectrum[] peaksFromLibraraySpectrum)
+        //{
+        //    double score = 0;
+        //    for (int i = 0; i < peaksFromLibraraySpectrum.Length; i++)
+        //    {
+        //        score += 1 + peaksFromLibraraySpectrum[i].Intensity / thisScan.TotalIonCurrent;
+        //    }
+        //    return score;
+        //}
 
         public static List<MatchedFragmentIon> MatchFragmentIons(Ms2ScanWithSpecificMass scan, List<Product> theoreticalProducts, CommonParameters commonParameters)
         {

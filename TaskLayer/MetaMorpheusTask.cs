@@ -412,14 +412,14 @@ namespace TaskLayer
 
             MetaMorpheusEngine.FinishedSingleEngineHandler += SingleEngineHandlerInTask;
 
-            foreach(var file in currentProteinDbFilenameList)
-            {
-                if(file.IsSpectralLibrary == true)
-                {
-                    spectralLibraryReader spectralLibraryReader = new spectralLibraryReader(file.FilePath);
-                    Spectrum[] spectralLibrary = spectralLibraryReader.spectrums;
-                }
-            }
+            //foreach(var file in currentProteinDbFilenameList)
+            //{
+            //    if(file.IsSpectralLibrary == true)
+            //    {
+            //        spectralLibraryReader spectralLibraryReader = new spectralLibraryReader(file.FilePath);
+            //        Spectrum[] spectralLibrary = spectralLibraryReader.spectrums;
+            //    }
+            //}
 
             //spectralLibraryReader spectralLibraryReader = new spectralLibraryReader(spectralLibrarayPath);
             //Spectrum[] spectralLibrary = spectralLibraryReader.spectrums;

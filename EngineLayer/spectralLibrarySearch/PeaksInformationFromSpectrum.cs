@@ -1,22 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Text;
+//using Proteomics.Fragmentation;
 
-namespace EngineLayer.spectralLibrarySearch
-{
-    public class PeaksInformationFromSpectrum
-    {
-        public double Mz { get; set; }
-        public double Intensity { get; set; }
-        public string  SpectrumPeakProductType { get; set; }
-        public int fragmentNumber { get; set; }
-        public double massErrorPpm { get; set; }
+//namespace EngineLayer.spectralLibrarySearch
+//{
+//    public class PeaksInformationFromSpectrum: MatchedFragmentIon
+//    {
+//        public double Mz { get; set; }
+//        public double Intensity { get; set; }
+//        public string  SpectrumPeakProductType { get; set; }
+//        public int FragmentNumber { get; set; }
+//        public double massErrorPpm { get; set; }
+//        public readonly int AminoAcidPosition;
 
-        public PeaksInformationFromSpectrum(double mz, double intensity)
-        {
-            Mz = mz;
-            Intensity = intensity;
-        }
+//        public PeaksInformationFromSpectrum(double mz, double intensity)
+//        {
+//            Mz = mz;
+//            Intensity = intensity;
+//        }
 
-    }
-}
+//        public override bool Equals(object obj);
+//        public override int GetHashCode();
+//        public override string ToString();
+
+//    }
+//}

@@ -1,4 +1,5 @@
 ﻿using Chemistry;
+using Easy.Common.Extensions;
 using EngineLayer.FdrAnalysis;
 using EngineLayer.spectralLibrarySearch;
 using Proteomics;
@@ -39,8 +40,32 @@ namespace EngineLayer
             CollisionEnergy = scan.TheScan.HcdEnergy;
             ScanFilter = scan.TheScan.ScanFilter;
 
+
             AddOrReplace(peptide, score, notch, true, matchedFragmentIons, xcorr);
         }
+        //public PeptideSpectralMatch(PeptideWithSetModifications peptide, int notch, double thisSpectrumMatchScore, int scanIndex, Ms2ScanWithSpecificMass scan, CommonParameters commonParameters, List<MatchedFragmentIon> matchedFragmentIons, double xcorr = 0)
+        //{
+        //    _BestMatchingPeptides = new List<(int, PeptideWithSetModifications)>();
+        //    ScanIndex = scanIndex;
+        //    FullFilePath = scan.FullFilePath;
+        //    ScanNumber = scan.OneBasedScanNumber;
+        //    PrecursorScanNumber = scan.OneBasedPrecursorScanNumber;
+        //    ScanRetentionTime = scan.RetentionTime;
+        //    ScanExperimentalPeaks = scan.NumPeaks;
+        //    TotalIonCurrent = scan.TotalIonCurrent;
+        //    ScanPrecursorCharge = scan.PrecursorCharge;
+        //    ScanPrecursorMonoisotopicPeakMz = scan.PrecursorMonoisotopicPeakMz;
+        //    ScanPrecursorMass = scan.PrecursorMass;
+        //    DigestionParams = commonParameters.DigestionParams;
+        //    PeptidesToMatchingFragments = new Dictionary<PeptideWithSetModifications, List<MatchedFragmentIon>>();
+        //    Xcorr = xcorr;
+        //    NativeId = scan.NativeId;
+        //    RunnerUpScore = commonParameters.ScoreCutoff;
+        //    CollisionEnergy = scan.TheScan.HcdEnergy;
+        //    ScanFilter = scan.TheScan.ScanFilter;
+        //    ThisSpectrumMatchScore = thisSpectrumMatchScore;
+        //    AddOrReplace(peptide, thisSpectrumMatchScore, notch, true, matchedFragmentIons, xcorr);
+        //}
 
         public ChemicalFormula ModsChemicalFormula { get; private set; } // these fields will be null if they are ambiguous
         public string FullSequence { get; private set; }
@@ -74,7 +99,8 @@ namespace EngineLayer
         public string CollisionEnergy { get; }
         public string ScanFilter { get; }
 
-        public double Score { get; private set; }
+        public double Score { get; set; }
+        public double ThisSpectrumMatchScore { get; set; }
         public double Xcorr;
         public string NativeId; // this is a property of the scan. used for mzID writing
 
@@ -86,6 +112,7 @@ namespace EngineLayer
 
         public DigestionParams DigestionParams { get; }
         public Dictionary<PeptideWithSetModifications, List<MatchedFragmentIon>> PeptidesToMatchingFragments { get; private set; }
+        //public Dictionary<PeptideWithSetModifications, Object> PeptidesToMatchingFragments { get; private set; }
 
         public IEnumerable<(int Notch, PeptideWithSetModifications Peptide)> BestMatchingPeptides
         {
@@ -135,6 +162,7 @@ namespace EngineLayer
             }
         }
 
+       
         //PEP-Value analysis identifies ambiguous peptides with lower probability. These are removed from the bestmatchingpeptides dictionary, which lowers ambiguity.
         public void RemoveThisAmbiguousPeptide(int notch, PeptideWithSetModifications pwsm)
         {
@@ -230,7 +258,7 @@ namespace EngineLayer
 
             // TODO: technically, different peptide options for this PSM can have different matched ions
             // we can write a Resolve method for this if we want...
-            MatchedFragmentIons = PeptidesToMatchingFragments.First().Value;
+                MatchedFragmentIons = PeptidesToMatchingFragments.First().Value;           
         }
 
         public static int GetLongestIonSeriesBidirectional(Dictionary<PeptideWithSetModifications, List<MatchedFragmentIon>> PeptidesToMatchingFragments, PeptideWithSetModifications peptide)
@@ -347,6 +375,8 @@ namespace EngineLayer
 
         public string Spectrum()
         {
+            Console.WriteLine(10010);
+
             double totalIonCurrent = this.TotalIonCurrent;
             StringBuilder sb = new StringBuilder();
             sb.Append("Name: " + this.FullSequence + "\r\n"); //full sequence
@@ -397,9 +427,9 @@ namespace EngineLayer
         {
             var newSpectrum = new Spectrum();
             newSpectrum.Name = this.FullSequence;
-            newSpectrum.MW = this.PeptideMonisotopicMass;
+            newSpectrum.MW = Convert.ToDouble(this.PeptideMonisotopicMass);
             newSpectrum.precursorMz = this.ScanPrecursorMonoisotopicPeakMz;
-            var peaksList = new List<PeaksInformationFromSpectrum>();
+            var peaksList = new List<MatchedFragmentIon>();
             double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
             foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
             {
@@ -407,11 +437,11 @@ namespace EngineLayer
                 double intensity = Math.Round(mfi.Intensity / intensitySum, 3);
                 double error = Math.Round(mfi.MassErrorPpm, 1);
                 int charge = mfi.Charge;
-                var b = new PeaksInformationFromSpectrum(mz, intensity);
-                b.massErrorPpm = error;
-                peaksList.Add(b);
+                //var b = new PeaksInformationFromSpectrum(mz, intensity);
+                //b.massErrorPpm = error;
+                //peaksList.Add(b);
             }
-            newSpectrum.Peaks = peaksList.ToArray();
+            newSpectrum.Peaks = peaksList;
             return newSpectrum;
         }
 

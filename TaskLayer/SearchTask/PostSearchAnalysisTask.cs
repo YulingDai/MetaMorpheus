@@ -973,10 +973,11 @@ namespace TaskLayer
         private void WritePeptideResults()
         {
             Status("Writing peptide results...", Parameters.SearchTaskId);
-
+            Console.WriteLine("3333");
             // write best (highest-scoring) PSM per peptide
             string filename = "All" + GlobalVariables.AnalyteType + "s.psmtsv";
             string writtenFile = Path.Combine(Parameters.OutputFolder, filename);
+            Console.WriteLine(writtenFile);
             List<PeptideSpectralMatch> peptides = Parameters.AllPsms.GroupBy(b => b.FullSequence).Select(b => b.FirstOrDefault()).ToList();
 
             new FdrAnalysisEngine(peptides, Parameters.NumNotches, CommonParameters, this.FileSpecificParameters, new List<string> { Parameters.SearchTaskId }, "Peptide").Run();
@@ -990,19 +991,20 @@ namespace TaskLayer
                 peptides.RemoveAll(b => b.IsContaminant);
             }
             peptides.RemoveAll(p => p.FdrInfo.QValue > CommonParameters.QValueOutputFilter);
-            if (Parameters.SpectralLibrary != null)
-            {
-                var experimentalSpectrums = new List<Spectrum>();
-                foreach (var psm in peptides)
-                {
-                    experimentalSpectrums.Add(psm.ToSpectrum());
-                }
+            //if (Parameters.SpectralLibrary != null)
+            //{
+            //    var experimentalSpectrums = new List<Spectrum>();
+            //    foreach (var psm in peptides)
+            //    {
+            //        experimentalSpectrums.Add(psm.ToSpectrum());
+            //    }
 
-                var spectralSearch = new ClassicSearchOfSpectralLibrary(Parameters.SpectralLibrary, experimentalSpectrums.ToArray(), 0.05, 0.02, 5);
-                WriteSpectralLibrarySearchResults(spectralSearch.SpectralLibrarySearchResults, Parameters.OutputFolder);
-            }
+            //    var spectralSearch = new ClassicSearchOfSpectralLibrary(Parameters.SpectralLibrary, experimentalSpectrums.ToArray(), 0.05, 0.02, 5);
+            //    WriteSpectralLibrarySearchResults(spectralSearch.SpectralLibrarySearchResults, Parameters.OutputFolder);
+            //}
            
             WritePsmsToTsv(peptides, writtenFile, Parameters.SearchParameters.ModsToWriteSelection);
+            
             WriteSpectra(peptides, Parameters.OutputFolder);
            
             FinishedWritingFile(writtenFile, new List<string> { Parameters.SearchTaskId });
