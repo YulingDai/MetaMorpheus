@@ -111,10 +111,8 @@ namespace EngineLayer.ClassicSearch
                                     }
                                 }
 
-                                if (SpectralLibraryDictionary != null)
+                                if (SpectralLibraryDictionary != null && SpectralLibraryDictionary.ContainsKey(peptide.FullSequence))
                                 {
-                                    try
-                                    {
                                         double thisSpectrumMatchScore = CalculatePeptideScore(scan.TheScan.TheScan, SpectralLibraryDictionary[peptide.FullSequence].Peaks);
                                         bool meetSpectrumScoreCutoff = thisSpectrumMatchScore >= CommonParameters.ScoreCutoff;
                                         if (meetSpectrumScoreCutoff)
@@ -134,27 +132,14 @@ namespace EngineLayer.ClassicSearch
                                                     }
                                                     else
                                                     {
-                                                        PeptideSpectralMatches[scan.ScanIndex].AddOrReplace(peptide, thisSpectrumMatchScore, scan.Notch, CommonParameters.ReportAllAmbiguity, SpectralLibraryDictionary[peptide.FullSequence].Peaks, 0);                               
-                                                    }
+                                                        PeptideSpectralMatches[scan.ScanIndex].AddOrReplace(peptide, thisSpectrumMatchScore, scan.Notch, CommonParameters.ReportAllAmbiguity, SpectralLibraryDictionary[peptide.FullSequence].Peaks, 0);
+                                                        PeptideSpectralMatches[scan.ScanIndex].Score = thisScore;
+                                                        PeptideSpectralMatches[scan.ScanIndex].ThisSpectrumMatchScore = thisSpectrumMatchScore;
                                                 }
-
-                                                if (thisScore > thisSpectrumMatchScore)
-                                                {
-                                                    PeptideSpectralMatches[scan.ScanIndex] = new PeptideSpectralMatch(peptide, scan.Notch, thisScore, scan.ScanIndex, scan.TheScan, CommonParameters, matchedIons, 0);
-                                                    PeptideSpectralMatches[scan.ScanIndex].ThisSpectrumMatchScore = thisSpectrumMatchScore;
                                                 }
                                             }
                                         }
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        if (e.Message.Contains("The given key", StringComparison.OrdinalIgnoreCase) && e.Message.Contains("was not present in the dictionary", StringComparison.OrdinalIgnoreCase))
-                                        { }
-                                        else
-                                        {
-                                            throw new Exception(e.Message);
-                                        }
-                                    }
+                                    
                                 }
               
                             }
