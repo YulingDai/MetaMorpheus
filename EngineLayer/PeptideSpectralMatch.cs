@@ -43,30 +43,7 @@ namespace EngineLayer
 
             AddOrReplace(peptide, score, notch, true, matchedFragmentIons, xcorr);
         }
-        //public PeptideSpectralMatch(PeptideWithSetModifications peptide, int notch, double thisSpectrumMatchScore, int scanIndex, Ms2ScanWithSpecificMass scan, CommonParameters commonParameters, List<MatchedFragmentIon> matchedFragmentIons, double xcorr = 0)
-        //{
-        //    _BestMatchingPeptides = new List<(int, PeptideWithSetModifications)>();
-        //    ScanIndex = scanIndex;
-        //    FullFilePath = scan.FullFilePath;
-        //    ScanNumber = scan.OneBasedScanNumber;
-        //    PrecursorScanNumber = scan.OneBasedPrecursorScanNumber;
-        //    ScanRetentionTime = scan.RetentionTime;
-        //    ScanExperimentalPeaks = scan.NumPeaks;
-        //    TotalIonCurrent = scan.TotalIonCurrent;
-        //    ScanPrecursorCharge = scan.PrecursorCharge;
-        //    ScanPrecursorMonoisotopicPeakMz = scan.PrecursorMonoisotopicPeakMz;
-        //    ScanPrecursorMass = scan.PrecursorMass;
-        //    DigestionParams = commonParameters.DigestionParams;
-        //    PeptidesToMatchingFragments = new Dictionary<PeptideWithSetModifications, List<MatchedFragmentIon>>();
-        //    Xcorr = xcorr;
-        //    NativeId = scan.NativeId;
-        //    RunnerUpScore = commonParameters.ScoreCutoff;
-        //    CollisionEnergy = scan.TheScan.HcdEnergy;
-        //    ScanFilter = scan.TheScan.ScanFilter;
-        //    ThisSpectrumMatchScore = thisSpectrumMatchScore;
-        //    AddOrReplace(peptide, thisSpectrumMatchScore, notch, true, matchedFragmentIons, xcorr);
-        //}
-
+     
         public ChemicalFormula ModsChemicalFormula { get; private set; } // these fields will be null if they are ambiguous
         public string FullSequence { get; private set; }
         public string EssentialSequence { get; private set; }
@@ -112,7 +89,6 @@ namespace EngineLayer
 
         public DigestionParams DigestionParams { get; }
         public Dictionary<PeptideWithSetModifications, List<MatchedFragmentIon>> PeptidesToMatchingFragments { get; private set; }
-        //public Dictionary<PeptideWithSetModifications, Object> PeptidesToMatchingFragments { get; private set; }
 
         public IEnumerable<(int Notch, PeptideWithSetModifications Peptide)> BestMatchingPeptides
         {
@@ -375,40 +351,15 @@ namespace EngineLayer
 
         public string Spectrum()
         {
-            Console.WriteLine(10010);
-
+  
             double totalIonCurrent = this.TotalIonCurrent;
             StringBuilder sb = new StringBuilder();
             sb.Append("Name: " + this.FullSequence + "\r\n"); //full sequence
             double? peakMonoisotopicMass = PsmTsvWriter.Resolve(_BestMatchingPeptides.Select(b => b.Pwsm.MonoisotopicMass)).ResolvedValue;
             sb.Append("Monoisotopic Mass: " + peakMonoisotopicMass + "\r\n"); //full sequence
             sb.Append("Comment: Parent=" + this.ScanPrecursorMonoisotopicPeakMz);
-            //this.ScanFilter.
-            //sb.Append(" Collision_energy=" + this.CollisionEnergy);
-            //var a = this.ScanFilter;
-            //if (this.ModsIdentified.Count == 0)
-            //{
-            //sb.Append(" Mods=" + this.ModsIdentified.Count);
             sb.Append(" ModString=" + this.FullSequence);
-            //}
-            //else
-            //{
-            //foreach (KeyValuePair<string, int> item in this.ModsIdentified)
-            //{
-
-            //Console.WriteLine("Key: {0}, Value: {1}", item.Key, item.Value);
-            //}
-            //}
-            //sb.Append(string.Join(Environment.NewLine, this.ModsIdentified.SelectMany(b => b.Value).GroupBy(b => b.Item2).OrderBy(b => -b.Count()).Select(b => "\t" + b.Key.IdWithMotif + "\t" + b.Count())));
-            //sb.Append("x" + this.ModsIdentified);
-            //sb.Append(" ModString=" + this.BaseSequence + "//" + this.ModsIdentified + "@" + this.BaseSequence + this.ModsIdentified.Values + "/" + this.ScanPrecursorCharge);
             sb.Append(" iRT=" + this.ScanRetentionTime + "\r\n");
-            //var _first = test.First();
-            //Console.WriteLine(sb);
-
-            //double precursorMz = Math.Round(this.ScanPrecursorMonoisotopicPeakMz, 5);
-            //double retentionTime = Math.Round(this.ScanRetentionTime, 2);
-            //sb.Append("Comment: Observed(mz)" + precursorMz + " PrecursorCharge: " + this.ScanPrecursorCharge + " Retention Time: " + retentionTime + "\r\n");
             sb.Append("Num Peaks: " + this.MatchedFragmentIons.Count() + "\n");
             double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
             foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
@@ -418,7 +369,6 @@ namespace EngineLayer
                 double error = Math.Round(mfi.MassErrorPpm, 1);
                 int charge = mfi.Charge;
                 sb.Append(mz + "\t" + intensity + "\t" + "\"" + mfi.NeutralTheoreticalProduct.ProductType.ToString() + mfi.NeutralTheoreticalProduct.FragmentNumber.ToString() + "/" + error + "ppm" + "\"" + "\r\n");
-                //Console.WriteLine(mfi.NeutralTheoreticalProduct.ProductType);
             }
             return sb.ToString();
         }
@@ -437,9 +387,6 @@ namespace EngineLayer
                 double intensity = Math.Round(mfi.Intensity / intensitySum, 3);
                 double error = Math.Round(mfi.MassErrorPpm, 1);
                 int charge = mfi.Charge;
-                //var b = new PeaksInformationFromSpectrum(mz, intensity);
-                //b.massErrorPpm = error;
-                //peaksList.Add(b);
             }
             newSpectrum.Peaks = peaksList;
             return newSpectrum;

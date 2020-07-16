@@ -73,8 +73,7 @@ namespace EngineLayer.ClassicSearch
                     {
                         // Stop loop if canceled
                         if (GlobalVariables.StopLoops) { return; }
-                        //Console.WriteLine(Proteins[i].Digest(CommonParameters.DigestionParams, FixedModifications, VariableModifications, SilacLabels, TurnoverLabels).ToArray().Length);
-
+               
                         // digest each protein into peptides and search for each peptide in all spectra within precursor mass tolerance
                         foreach (PeptideWithSetModifications peptide in Proteins[i].Digest(CommonParameters.DigestionParams, FixedModifications, VariableModifications, SilacLabels, TurnoverLabels))
                         {

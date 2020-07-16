@@ -27,21 +27,16 @@ namespace Test
             //spectralLibraryReader x = new spectralLibraryReader(spectralLibrary);
             foreach(var y in x.SpectralLibraryDictionary)
             {
-                Console.WriteLine(y.Key);
-                Console.WriteLine(y.Value.ToString());
+                //Console.WriteLine(y.Key);
+                //Console.WriteLine(y.Value.ToString());
             }
 
-           // Console.WriteLine(0);
-            //Console.WriteLine(x.SpectralLibraryDictionary["KAPAGGAADAAAK"].ToString());
-            //Console.WriteLine(1);
-
-            //Console.WriteLine("0000");
             string myMzMLTestFile = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\SmallCalibratible_Yeast.mzML");
             string myDatabase = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\smalldb.fasta");
             //string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
             DbForTask db = new DbForTask(myDatabase, true);
             DbForTask dbOfSpectralLibrary = new DbForTask(spectralLibrary, true, true);
-            //Console.WriteLine("0000");
+         
 
             string spectralLibraryTestFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestSpectralLibrary");
             Directory.CreateDirectory(spectralLibraryTestFolder);

@@ -16,64 +16,36 @@ namespace Test
     [TestFixture]
     public static class SpectralLibraryTest
     {
-        //// helper method to compare  files
-        //public static string GetFileHash(string filename)
-        //{
-        //    var hash = new SHA256Managed();
-        //    var clearBytes = File.ReadAllBytes(filename);
-        //    var hashedBytes = hash.ComputeHash(clearBytes);
-        //    return ConvertBytesToHex(hashedBytes);
-        //}
-
-        //// helper method to compare 2 files
-        //public static string ConvertBytesToHex(byte[] bytes)
-        //{
-        //    var sb = new StringBuilder();
-
-        //    for (var i = 0; i < bytes.Length; i++)
-        //    {
-        //        sb.Append(bytes[i].ToString("x"));
-        //    }
-        //    return sb.ToString();
-        //}
-
-
         [Test]
         public static void SpectrumTest()
 
         {
-            string myMzMLTestFile1 = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\04-30-13_CAST_Frac5_4uL.raw");
-            string myDatab = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\uniprot-mouse-reviewed-2-5-2018.fasta");
-            string spectralLib = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\Mouse_spectralLibrary.msp");
-            DbForTask db = new DbForTask(myDatab, true);
-            DbForTask dbOfSpectralLibrary = new DbForTask(spectralLib, true, true);
+
+
+            string myMzMLTestFile = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\SmallCalibratible_Yeast.mzML");
+            string myDatabase = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\smalldb.fasta");
+            string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
+            DbForTask db = new DbForTask(myDatabase, true);
+            DbForTask dbOfSpectralLibrary = new DbForTask(spectralLibrary, true, true);
             string spectralLibraryTestFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestSpectralLibrary");
             Directory.CreateDirectory(spectralLibraryTestFolder);
+            //run task
             var x = new SearchTask();
-            x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db, dbOfSpectralLibrary }, new List<string> { myMzMLTestFile1 }, "normal");
+            x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db, dbOfSpectralLibrary }, new List<string> { myMzMLTestFile }, "normal");
 
-            //string myMzMLTestFile = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\SmallCalibratible_Yeast.mzML");
-            //string myDatabase = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\smalldb.fasta");
-            //string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
-            ////string xyz = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\testofspectralLibrary.msp");
-            //DbForTask db = new DbForTask(myDatabase, true);
-            //DbForTask dbOfSpectralLibrary = new DbForTask(spectralLibrary, true, true);
+
+            //string myMzMLTestFile1 = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\04-30-13_CAST_Frac5_4uL.raw");
+            //string myDatab = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\uniprot-mouse-reviewed-2-5-2018.fasta");
+            //string spectralLib = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\Mouse_spectralLibrary.msp");
+            //DbForTask db = new DbForTask(myDatab, true);
+            //DbForTask dbOfSpectralLibrary = new DbForTask(spectralLib, true, true);
             //string spectralLibraryTestFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestSpectralLibrary");
             //Directory.CreateDirectory(spectralLibraryTestFolder);
+            //var x = new SearchTask();
+            //x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db, dbOfSpectralLibrary }, new List<string> { myMzMLTestFile1 }, "normal");
 
             //string pathToExpectedSpectralLibaryResult = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
             //string TestSpectralLibraryResultFullPath = Path.Combine(spectralLibraryTestFolder, @"spectralLibrary.msp");
-
-            
-            ////run task
-            //var x = new SearchTask();
-            //x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db, dbOfSpectralLibrary }, new List<string> { myMzMLTestFile }, "normal");
-            //x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db, dbOfSpectralLibrary }, new List<string> { myMzMLTestFile }, spectralLibrary, "normal");
-            //x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, spectralLibrary, "normal");
-            //new SearchTask().RunTask(spectralLibraryTestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, "normal");
-            // ThermoRawFileReaderData y = ThermoRawFileReaderData.LoadAllStaticData(myMzMLTestFile,null,-1);
-            //Console.WriteLine(y.GetAllScansList());
-
 
             //var test = y.GetAllScansList();
             //foreach (var ms2scan in test.Where(x => x.MsnOrder != 1))
@@ -97,7 +69,7 @@ namespace Test
 
             //var y = new LoadAllStaticData(myMzMLTestFile, null, -1);
 
-            
+
 
             //Directory.Delete(spectralLibraryTestFolder, true);
         }

@@ -42,7 +42,6 @@ namespace EngineLayer.spectralLibrarySearch
                 }
             }
             nameLine.Add(lines.Length);// for the convenience to separate the file to different parts
-            nameLine.ForEach(i => Console.Write("{0}\t", i));
 
             //load separate spectrums 
             for (int i = 0; i < nameLine.Count - 1; i++)
@@ -51,7 +50,6 @@ namespace EngineLayer.spectralLibrarySearch
                     var singleSpectrum = new Spectrum();
                     for (int j = nameLine[i]; j < nameLine[i + 1]-1; j++)
                     {
-                    Console.Write(j + " " + nameLine[i]);
                         //get name of each spectrum
                         if (lines[j].Contains("name", StringComparison.OrdinalIgnoreCase))
                         {
@@ -148,11 +146,9 @@ namespace EngineLayer.spectralLibrarySearch
                                 string[] by = eachPeak[2].Split(new char[] { '/', '\"', 'p' }, StringSplitOptions.RemoveEmptyEntries).Select(b => b.Trim()).ToArray();
                                 var spectrumPeakProductType = by[0].ToCharArray()[0].ToString();
                                 var fragmentNumber = (int)Char.GetNumericValue(by[0].ToCharArray()[1]);
-                                //if(Enum.IsDefined(typeof(ProductType), spectrumPeakProductType))
-                                //{
+            
                                 ProductType peakProductType = (ProductType)Enum.Parse(typeof(ProductType), spectrumPeakProductType, true);
                                 FragmentationTerminus terminus = (FragmentationTerminus)Enum.Parse(typeof(FragmentationTerminus), "None", true);
-                                //}
                                 ProductType.a.ToString();
                                 var product = new Product(peakProductType, terminus, 0, fragmentNumber, 0, 0);
                                 var b = new MatchedFragmentIon(ref product, double.Parse(eachPeak[0]), double.Parse(eachPeak[1]), 1);
