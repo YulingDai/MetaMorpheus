@@ -342,12 +342,10 @@ namespace TaskLayer
                 else
                 {
                     Status("Starting search...", thisId);
-                    Console.WriteLine(10012);
                     var newClassicSearchEngine = new ClassicSearchEngine(fileSpecificPsms, arrayOfMs2ScansSortedByMass, variableModifications, fixedModifications, SearchParameters.SilacLabels,
                         SearchParameters.StartTurnoverLabel, SearchParameters.EndTurnoverLabel, proteinList, massDiffAcceptor, combinedParams, this.FileSpecificParameters, thisId);
                     newClassicSearchEngine.SpectralLibraryDictionary = spectralLibrary;
                     newClassicSearchEngine.Run();
-                  
                     ReportProgress(new ProgressEventArgs(100, "Done with search!", thisId));
                 }
 
@@ -375,6 +373,7 @@ namespace TaskLayer
             {
                 allPsms = NonSpecificEnzymeSearchEngine.ResolveFdrCategorySpecificPsms(allCategorySpecificPsms, numNotches, taskId, CommonParameters, FileSpecificParameters);
             }
+            Console.WriteLine(allPsms.Count);
 
             //List<PeptideSpectralMatch> psms = allPsms.GroupBy(b => b.FullSequence).Select(b => b.FirstOrDefault()).ToList();
             //var experimentalSpectrums = new List<Spectrum>();

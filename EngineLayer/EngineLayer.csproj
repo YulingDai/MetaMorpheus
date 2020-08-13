@@ -28,6 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="spectralLibrarySearch\PeaksInformationFromSpectrum.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Contaminants\MPI_Contaminants.fasta">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

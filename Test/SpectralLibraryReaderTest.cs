@@ -19,30 +19,37 @@ namespace Test
         [Test]
         public static void SpectralReaderTest()
         {
-            string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
-            string spectral= Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
+            string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\HelaMannSpectralLibrary.msp");
+            string spectral= Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\newspectralLibrary.msp");
             string xyz = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\testofspectralLibrary.msp");
-            spectralLibraryReader x = new spectralLibraryReader(xyz);
+            spectralLibraryReader x = new spectralLibraryReader(spectral);
 
             //spectralLibraryReader x = new spectralLibraryReader(spectralLibrary);
-            foreach(var y in x.SpectralLibraryDictionary)
+            Console.WriteLine(x.SpectralLibraryDictionary.Count);
+            foreach (var y in x.SpectralLibraryDictionary)
             {
-                //Console.WriteLine(y.Key);
-                //Console.WriteLine(y.Value.ToString());
+                Console.WriteLine(y.Key);
+               foreach(var z in y.Value.PeaksWithIntensity)
+                {
+                    Console.WriteLine(z.Key.NeutralMass + "   " + z.Value + "   " + z.Key.ProductType.ToString() + z.Key.FragmentNumber);
+                }
+                   
+                
+
             }
 
-            string myMzMLTestFile = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\SmallCalibratible_Yeast.mzML");
-            string myDatabase = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\smalldb.fasta");
-            //string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
-            DbForTask db = new DbForTask(myDatabase, true);
-            DbForTask dbOfSpectralLibrary = new DbForTask(spectralLibrary, true, true);
-         
+            //string myMzMLTestFile = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\SmallCalibratible_Yeast.mzML");
+            //string myDatabase = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\smalldb.fasta");
+            ////string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
+            //DbForTask db = new DbForTask(myDatabase, true);
+            //DbForTask dbOfSpectralLibrary = new DbForTask(spectralLibrary, true, true);
 
-            string spectralLibraryTestFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestSpectralLibrary");
-            Directory.CreateDirectory(spectralLibraryTestFolder);
 
-            string pathToExpectedSpectralLibaryResult = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
-            string TestSpectralLibraryResultFullPath = Path.Combine(spectralLibraryTestFolder, @"spectralLibrary.msp");
+            //string spectralLibraryTestFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestSpectralLibrary");
+            //Directory.CreateDirectory(spectralLibraryTestFolder);
+
+            //string pathToExpectedSpectralLibaryResult = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\spectralLibrary.msp");
+            //string TestSpectralLibraryResultFullPath = Path.Combine(spectralLibraryTestFolder, @"spectralLibrary.msp");
 
 
             //run task

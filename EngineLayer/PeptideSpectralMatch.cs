@@ -362,10 +362,12 @@ namespace EngineLayer
             sb.Append(" iRT=" + this.ScanRetentionTime + "\r\n");
             sb.Append("Num Peaks: " + this.MatchedFragmentIons.Count() + "\n");
             double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
+           
             foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
             {
-                double mz = Math.Round(mfi.Mz, 5);
-                double intensity = Math.Round(mfi.Intensity / intensitySum, 3);
+
+                double mz = mfi.Mz;
+                double intensity = Math.Round(mfi.Intensity / intensitySum, 7);
                 double error = Math.Round(mfi.MassErrorPpm, 1);
                 int charge = mfi.Charge;
                 sb.Append(mz + "\t" + intensity + "\t" + "\"" + mfi.NeutralTheoreticalProduct.ProductType.ToString() + mfi.NeutralTheoreticalProduct.FragmentNumber.ToString() + "/" + error + "ppm" + "\"" + "\r\n");
@@ -373,24 +375,29 @@ namespace EngineLayer
             return sb.ToString();
         }
 
-        public Spectrum ToSpectrum()
-        {
-            var newSpectrum = new Spectrum();
-            newSpectrum.Name = this.FullSequence;
-            newSpectrum.MW = Convert.ToDouble(this.PeptideMonisotopicMass);
-            newSpectrum.precursorMz = this.ScanPrecursorMonoisotopicPeakMz;
-            var peaksList = new List<MatchedFragmentIon>();
-            double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
-            foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
-            {
-                double mz = Math.Round(mfi.Mz, 5);
-                double intensity = Math.Round(mfi.Intensity / intensitySum, 3);
-                double error = Math.Round(mfi.MassErrorPpm, 1);
-                int charge = mfi.Charge;
-            }
-            newSpectrum.Peaks = peaksList;
-            return newSpectrum;
-        }
+        //public Spectrum ToSpectrum()
+        //{
+        //    var newSpectrum = new Spectrum();
+        //    newSpectrum.Name = this.FullSequence;
+        //    double? peakMonoisotopicMass = PsmTsvWriter.Resolve(_BestMatchingPeptides.Select(b => b.Pwsm.MonoisotopicMass)).ResolvedValue;
+        //    newSpectrum.MonoisotopicMass = Convert.ToDouble(peakMonoisotopicMass);
+        //    newSpectrum.precursorMz = this.ScanPrecursorMonoisotopicPeakMz;
+        //    double intensitySum = this.MatchedFragmentIons.Select(m => m.Intensity).Sum();
+        //    //newSpectrum.MW = Convert.ToDouble(this.PeptideMonisotopicMass);
+            
+        //    var peaksList = new List<MatchedFragmentIon>();
+
+        //    foreach (MatchedFragmentIon mfi in this.MatchedFragmentIons)
+        //    {
+        //        double mz = mfi.Mz;
+        //        double intensity = mfi.Intensity / intensitySum;
+        //        double error = Math.Round(mfi.MassErrorPpm, 1);
+        //        int charge = mfi.Charge;
+
+        //    }
+        //    newSpectrum.Peaks = peaksList;
+        //    return newSpectrum;
+        //}
 
 
         /// <summary>

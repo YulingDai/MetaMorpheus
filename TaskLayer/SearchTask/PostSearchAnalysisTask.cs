@@ -7,7 +7,9 @@ using EngineLayer.spectralLibrarySearch;
 using FlashLFQ;
 using MassSpectrometry;
 using MathNet.Numerics.Distributions;
+using MzLibUtil;
 using Proteomics;
+using Proteomics.Fragmentation;
 using Proteomics.ProteolyticDigestion;
 using System;
 using System.Collections.Generic;
@@ -16,6 +18,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using ThermoFisher.CommonCore.Data.Business;
 using UsefulProteomicsDatabases;
 
 namespace TaskLayer
@@ -61,13 +64,17 @@ namespace TaskLayer
                 CalculatePsmFdr();
             }
 
+            Console.WriteLine(Parameters.AllPsms.Count);
+
             DoMassDifferenceLocalizationAnalysis();
+            Console.WriteLine(Parameters.AllPsms.Count);
             ProteinAnalysis();
             QuantificationAnalysis();
 
             ReportProgress(new ProgressEventArgs(100, "Done!", new List<string> { Parameters.SearchTaskId, "Individual Spectra Files" }));
 
             HistogramAnalysis();
+            Console.WriteLine(Parameters.AllPsms.Count);
             WritePsmResults();
             WriteProteinResults();
             WriteQuantificationResults();
@@ -76,8 +83,9 @@ namespace TaskLayer
             {
                 WriteVariantResults();
             }
-
+            Console.WriteLine(Parameters.AllPsms.Count);
             WritePeptideResults(); // modifies the FDR results for PSMs, so do this last
+            Console.WriteLine(Parameters.AllPsms.Count);
             CompressIndividualFileResults();
             return Parameters.SearchTaskResults;
         }
@@ -973,12 +981,126 @@ namespace TaskLayer
         private void WritePeptideResults()
         {
             Status("Writing peptide results...", Parameters.SearchTaskId);
-            Console.WriteLine("3333");
+
             // write best (highest-scoring) PSM per peptide
             string filename = "All" + GlobalVariables.AnalyteType + "s.psmtsv";
             string writtenFile = Path.Combine(Parameters.OutputFolder, filename);
-            Console.WriteLine(writtenFile);
+       
             List<PeptideSpectralMatch> peptides = Parameters.AllPsms.GroupBy(b => b.FullSequence).Select(b => b.FirstOrDefault()).ToList();
+            Dictionary<String, List<PeptideSpectralMatch>> PsmsGroupByPeptide = new Dictionary<String, List<PeptideSpectralMatch>>();
+            var ListOfPsmsGroupByPeptide = Parameters.AllPsms.GroupBy(b => b.FullSequence);
+            foreach (var x in ListOfPsmsGroupByPeptide)
+            {
+                var group = ListOfPsmsGroupByPeptide.Single(g => g.Key == x.Key);
+                var ListOfPeptideSpectralMatch = new List<PeptideSpectralMatch>();
+                for (int i = 0; i < group.Count(); i++)
+                {
+                    ListOfPeptideSpectralMatch.Add(group.ElementAt(i));
+                }
+                
+                PsmsGroupByPeptide.Add(x.Key, ListOfPeptideSpectralMatch);
+                
+               
+            }
+            var spectrumLibrary = new List<Spectrum>();
+            foreach(var x in PsmsGroupByPeptide)
+            {
+                var peakCluster = new List<Peaks>();
+                var peakDic = new List<Peaks>();
+                if (x.Value.Count == 1)
+                {
+                    double intensitySum = x.Value[0].MatchedFragmentIons.Select(m => m.Intensity).Sum();
+                    foreach(var y in x.Value[0].MatchedFragmentIons)
+                    {
+                        peakDic.Add( new Peaks(y.Mz, y.Intensity / intensitySum, y.NeutralTheoreticalProduct));
+                    }
+                    //spectrumLibrary.Add(new Spectrum(x.Key, peakDic));
+                }
+                else
+                {
+                    Tolerance tolerance = new PpmTolerance(40);
+                    var productDictionary = new Dictionary<int, List<Product>>();
+                    for(int j = 0; j < x.Value.Count; j++)
+                    {
+                        productDictionary.Add(j, x.Value[j].MatchedFragmentIons.Select(p => p.NeutralTheoreticalProduct).ToList());
+                    }
+                    List <Product> productUnion = productDictionary[0];
+                    for (int k = 0; k< productDictionary.Count-1; k++)
+                    {
+                        productUnion = productUnion.Union(productDictionary[k + 1]).ToList();
+                    }
+                    //foreach(var ion in x.Value[0].MatchedFragmentIons)
+                    //{
+                    //    for(int i=1; i < x.Value.Count; i++)
+                    //    {
+                    //        foreach(var eachIon in x.Value[i].MatchedFragmentIons)
+                    //        {
+                    //            if ( tolerance.Within(  ))
+                    //        }
+                    //    }
+                    //}
+
+                    foreach(var product in productUnion)
+                    {
+                        var mzList = new List<double>();
+                        var intensityList = new List<double>();
+                        var exceptMzList = new List<double>();
+                        var exceptIntensityList = new List<double>();
+                        for (int j = 0; j < x.Value.Count; j++)
+                        {
+                            double intensitySum = x.Value[j].MatchedFragmentIons.Select(m => m.Intensity).Sum();
+                            for (int k = 0; k < x.Value[j].MatchedFragmentIons.Count; k++)
+                            {
+
+                                if (x.Value[j].MatchedFragmentIons[k].NeutralTheoreticalProduct.Equals(product))
+                                {
+                                    if(mzList.Count == 0)
+                                    {
+                                        mzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
+                                        intensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
+                                    }
+                                    else
+                                    {
+                                        if(tolerance.Within(mzList[0], x.Value[j].MatchedFragmentIons[k].Mz))
+                                        {
+                                            mzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
+                                            intensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
+                                        }
+                                        else if(exceptMzList.Count == 0)
+                                        {
+                                            exceptMzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
+                                            exceptIntensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
+                                        }
+                                        else if(tolerance.Within(exceptMzList[0], x.Value[j].MatchedFragmentIons[k].Mz))
+                                        {
+                                            exceptMzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
+                                            exceptIntensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
+                                        }
+                                        
+                                    }
+                                   
+                                    //peaks.Add(new Peaks(x.Value[j].MatchedFragmentIons[k].Mz, x.Value[j].MatchedFragmentIons[k].Intensity));
+                                }
+                            }
+                        }
+                        if(mzList.Count != 0)
+                        {
+                            peakDic.Add( new Peaks(mzList.Average(), intensityList.Sum() / x.Value.Count, product));
+                        }
+                        if (exceptMzList.Count != 0)
+                        {
+                            peakDic.Add(new Peaks(exceptMzList.Average(), exceptIntensityList.Sum() / x.Value.Count, product));
+                        }
+
+
+                    }
+                }
+                spectrumLibrary.Add(new Spectrum(x.Key, peakDic));
+            }
+          
+            
+
+        
 
             new FdrAnalysisEngine(peptides, Parameters.NumNotches, CommonParameters, this.FileSpecificParameters, new List<string> { Parameters.SearchTaskId }, "Peptide").Run();
 
@@ -990,6 +1112,7 @@ namespace TaskLayer
             {
                 peptides.RemoveAll(b => b.IsContaminant);
             }
+           
             peptides.RemoveAll(p => p.FdrInfo.QValue > CommonParameters.QValueOutputFilter);
             //if (Parameters.SpectralLibrary != null)
             //{
@@ -1002,10 +1125,13 @@ namespace TaskLayer
             //    var spectralSearch = new ClassicSearchOfSpectralLibrary(Parameters.SpectralLibrary, experimentalSpectrums.ToArray(), 0.05, 0.02, 5);
             //    WriteSpectralLibrarySearchResults(spectralSearch.SpectralLibrarySearchResults, Parameters.OutputFolder);
             //}
-           
+          
             WritePsmsToTsv(peptides, writtenFile, Parameters.SearchParameters.ModsToWriteSelection);
+           
+            //WriteSpectra(peptides, Parameters.OutputFolder);
+            WriteSpectralLibrary(spectrumLibrary, Parameters.OutputFolder);
+
             
-            WriteSpectra(peptides, Parameters.OutputFolder);
            
             FinishedWritingFile(writtenFile, new List<string> { Parameters.SearchTaskId });
 

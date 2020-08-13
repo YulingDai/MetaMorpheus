@@ -1,5 +1,4 @@
 ﻿using Chemistry;
-using EngineLayer.spectralLibrarySearch;
 using MassSpectrometry;
 using System;
 using System.Collections.Generic;
@@ -19,7 +18,7 @@ namespace EngineLayer
             NativeId = mzLibScan.NativeId;
 
             TheScan = mzLibScan;
-
+           
             if (commonParam.DissociationType != DissociationType.LowCID)
             {
                 ExperimentalFragments = neutralExperimentalFragments ?? GetNeutralExperimentalFragments(mzLibScan, commonParam);
@@ -28,11 +27,23 @@ namespace EngineLayer
             if (ExperimentalFragments != null && ExperimentalFragments.Any())
             {
                 DeconvolutedMonoisotopicMasses = ExperimentalFragments.Select(p => p.MonoisotopicMass).ToArray();
+                DeconvolutedMonoisotopicMassesForLibrarySearch = new double[DeconvolutedMonoisotopicMasses.Length];
+                for (int i = 0; i < DeconvolutedMonoisotopicMasses.Length; i++)
+                {
+                    DeconvolutedMonoisotopicMassesForLibrarySearch[i] = DeconvolutedMonoisotopicMasses[i].ToMz(ExperimentalFragments[i].Charge);
+                }
+                DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch = new Dictionary<double, int>();
+                for (int i = 0; i < DeconvolutedMonoisotopicMassesForLibrarySearch.Length; i++)
+                {
+                    DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch[DeconvolutedMonoisotopicMassesForLibrarySearch[i]] = i;
+                }
             }
             else
             {
                 DeconvolutedMonoisotopicMasses = new double[0];
             }
+
+            ExperimentalMonoisotopicMasses = ExperimentalFragments.Select(b => b.MonoisotopicMass).ToArray();
         }
 
         public MsDataScan TheScan { get; }
@@ -41,8 +52,11 @@ namespace EngineLayer
         public int PrecursorCharge { get; }
         public string FullFilePath { get; }
         public IsotopicEnvelope[] ExperimentalFragments { get; private set; }
+        double[] ExperimentalMonoisotopicMasses { get; set; }
         public List<Ms2ScanWithSpecificMass> ChildScans { get; set; } // MS2/MS3 scans that are children of this MS2 scan
-        private double[] DeconvolutedMonoisotopicMasses;
+        public double[] DeconvolutedMonoisotopicMasses;
+        public double[] DeconvolutedMonoisotopicMassesForLibrarySearch;
+        public Dictionary<double, int> DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch;
         public string NativeId { get; } 
 
         public int OneBasedScanNumber => TheScan.OneBasedScanNumber;
@@ -91,7 +105,18 @@ namespace EngineLayer
             {
                 return null;
             }
+
             return ExperimentalFragments[GetClosestFragmentMass(theoreticalNeutralMass)];
+        }
+
+        public IsotopicEnvelope LibraryGetClosestExperimentalIsotopicEnvelope(double libraryNeutralMass)
+        {
+            if (DeconvolutedMonoisotopicMasses.Length == 0)
+            {
+                return null;
+            }
+
+            return ExperimentalFragments[GetClosestLibraryFragmentMass(libraryNeutralMass)];
         }
 
         public int GetClosestFragmentMass(double mass)
@@ -113,6 +138,45 @@ namespace EngineLayer
             }
 
             return index - 1;
+        }
+
+        public int GetClosestLibraryFragmentMass(double mass)
+
+        {
+            Array.Sort(DeconvolutedMonoisotopicMassesForLibrarySearch);
+            //Console.WriteLine(mass);
+            //foreach(var x in DeconvolutedMonoisotopicMasses)
+            //{
+            //    Console.WriteLine(x);
+            //}
+            int indexBeforeAdjust = Array.BinarySearch(DeconvolutedMonoisotopicMassesForLibrarySearch, mass);
+            //try
+            //{
+            //    double mz = DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust];
+            //}catch(Exception e)
+            //{
+            //    Console.WriteLine(DeconvolutedMonoisotopicMassesForLibrarySearch.Length + "  " + indexBeforeAdjust);
+            //}
+            ////double mz = DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust];
+            //int index = DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch[DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust]];
+            ////Console.WriteLine(mass + " "+ index + "GetClosestLibraryFragmentMass");
+            if (indexBeforeAdjust >= 0)
+            {
+                
+                return DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch[DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust]];
+            }
+            indexBeforeAdjust = ~indexBeforeAdjust;
+
+            if (indexBeforeAdjust == DeconvolutedMonoisotopicMassesForLibrarySearch.Length)
+            {
+                return DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch[DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust-1]];
+            }
+            if (indexBeforeAdjust == 0 || mass - DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust - 1] > DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust] - mass)
+            {
+                return DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch[DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust]];
+            }
+
+            return DictionaryOfDeconvolutedMonoisotopicMassesForLibrarySearch[DeconvolutedMonoisotopicMassesForLibrarySearch[indexBeforeAdjust-1]];
         }
 
         public double? GetClosestExperimentalFragmentMz(double theoreticalMz, out double? intensity)

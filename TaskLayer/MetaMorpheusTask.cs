@@ -703,6 +703,7 @@ namespace TaskLayer
 
         protected static void WritePsmsToTsv(IEnumerable<PeptideSpectralMatch> psms, string filePath, IReadOnlyDictionary<string, int> modstoWritePruned)
         {
+           
             using (StreamWriter output = new StreamWriter(filePath))
             {
                 output.WriteLine(PeptideSpectralMatch.GetTabSeparatedHeader());
@@ -710,11 +711,13 @@ namespace TaskLayer
                 {
                     output.WriteLine(psm.ToString(modstoWritePruned));
                 }
+
             }
         }
 
         protected static void WriteSpectra(IEnumerable<PeptideSpectralMatch> psms, string outputFolder)
         {
+            
             string spectrumFilePath = outputFolder + "\\spectralLibrary.msp";
             using (StreamWriter output = new StreamWriter(spectrumFilePath))
             {
@@ -723,29 +726,26 @@ namespace TaskLayer
                 {
                     output.WriteLine(psm.Spectrum());
                 }
+                
             }
         }
 
-        protected static void WriteSpectralLibrarySearchResults(SpectralLibrarySearchResults[] spectralLibrarySearchs, string outputFolder)
+        protected static void WriteSpectralLibrary(List<Spectrum> spectrumLibrary, string outputFolder)
         {
-            string spectralLibrarySearchResults = outputFolder + "\\spectralLibrarySearchResults.msp";
            
-            using (StreamWriter output = new StreamWriter(spectralLibrarySearchResults))
+            string spectrumFilePath = outputFolder + "\\spectralLibrary.msp";
+            using (StreamWriter output = new StreamWriter(spectrumFilePath))
             {
-                foreach (var x in spectralLibrarySearchs)
+
+                foreach (var x in spectrumLibrary)
                 {
-                    output.WriteLine("Experimental spectrum name: " + x.TheExperimentalSpectrum.Name);
-                    foreach (SpectralLibrarayMatch A in x.SpectralLibrarayMatchs)
-                    {
-                        output.WriteLine("Matched score: " + A.MatchScore );
-                        output.WriteLine("Spectral Library search results: ");
-                        output.WriteLine(A.MatchedSpectrumFromLibrary.ToString());
-                        //output.WriteLine(A.MatchedSpectrumFromLibrary.precursorMz);
-                       
-                    }
+                    output.WriteLine(x.ToString());
                 }
+
             }
         }
+
+     
 
         protected void ReportProgress(ProgressEventArgs v)
         {
