@@ -143,14 +143,24 @@ namespace EngineLayer.ClassicSearch
                                     var matchedMz = spectrumMatchedIons.Select(p => p.Mz).ToArray();
                                     var matchedIntensity = spectrumMatchedIons.Select(p => p.Intensity).ToArray();
                                     var matchedpectrum = new MzSpectrum(matchedMz, matchedIntensity, false);
-                                    double spectrumDotProductScore = matchedpectrum.CalculateDotProductSimilarity(librarySpectrum, CommonParameters.ProductMassTolerance);
-                                    //double spectrumDotProductScore = scan.TheScan.TheScan.MassSpectrum.CalculateDotProductSimilarity(librarySpectrum, CommonParameters.ProductMassTolerance);
-
-                                    if (DotPeptideSpectralMatches[scan.ScanIndex] == null || spectrumDotProductScore > DotPeptideSpectralMatches[scan.ScanIndex].Score)
+                                    //double spectrumDotProductScore = matchedpectrum.CalculateDotProductSimilarity(librarySpectrum, CommonParameters.ProductMassTolerance);
+                                    double spectrumDotProductScore = scan.TheScan.TheScan.MassSpectrum.CalculateDotProductSimilarity(librarySpectrum, CommonParameters.ProductMassTolerance);
+                                    //if (peptide.FullSequence == "RPYESSR")
+                                    //{
+                                        double spectrumSharedDotProductScore = this.CalculateSharedDotProductSimilarity(scan.TheScan.TheScan.MassSpectrum, librarySpectrum, CommonParameters.ProductMassTolerance);
+                                    //}
+                                    //double spectrumSharedDotProductScore = this.CalculateSharedDotProductSimilarity(scan.TheScan.TheScan.MassSpectrum, librarySpectrum, CommonParameters.ProductMassTolerance);
+                                    if(thisScore < 5)
                                     {
-                                        DotPeptideSpectralMatches[scan.ScanIndex] = new SpectralLibrarySearchResults(peptide.FullSequence, spectrumDotProductScore, scan.ScanIndex);
-
+                                        Console.WriteLine(thisScore + "  " + spectrumDotProductScore + "   " + spectrumSharedDotProductScore);
                                     }
+                                    
+                                    //Console.WriteLine(peptide.FullSequence +"   " +thisScore + "  " + spectrumDotProductScore + "   " );
+                                    //if (DotPeptideSpectralMatches[scan.ScanIndex] == null || spectrumDotProductScore > DotPeptideSpectralMatches[scan.ScanIndex].Score)
+                                    //{
+                                    //    DotPeptideSpectralMatches[scan.ScanIndex] = new SpectralLibrarySearchResults(peptide.FullSequence, spectrumDotProductScore, scan.ScanIndex);
+
+                                    //}
 
 
                                     //if (!meetsScoreCutoff && spectrumDotProductScore>0.8)
@@ -358,6 +368,71 @@ namespace EngineLayer.ClassicSearch
             }
             return new MetaMorpheusEngineResults(this);
 
+        }
+        public double CalculateSharedDotProductSimilarity(MzSpectrum thisSpectrum, MzSpectrum spectrumToCompare, Tolerance tolerance)
+        {
+            //get arrays of m/zs and intensities
+            double[] mz1 = thisSpectrum.XArray;
+            double[] intensity1 = thisSpectrum.YArray;
+
+            double[] mz2 = spectrumToCompare.XArray;
+            double[] intensity2 = spectrumToCompare.YArray;
+
+            //convert spectra to vectors
+            List<double> vector1 = new List<double>();
+            List<double> vector2 = new List<double>();
+            int i = 0; //iterate through mz1
+            int j = 0; //iterate through mz2
+
+            //find where peaks match
+            while (i != mz1.Length && j != mz2.Length)
+            {
+                double one = mz1[i];
+                double two = mz2[j];
+                if (tolerance.Within(one, two)) //if match
+                {
+                    vector1.Add(intensity1[i]);
+                    vector2.Add(intensity2[j]);
+                    i++;
+                    j++;
+                }
+                else if (one > two)
+                {
+                    //vector1.Add(0);
+                    //vector2.Add(intensity2[j]);
+                    j++;
+                }
+                else //two>one
+                {
+                    //vector1.Add(intensity1[i]);
+                    //vector2.Add(0);
+                    i++;
+                }
+            }
+            //wrap up leftover peaks
+            //for (; i < mz1.Length; i++)
+            //{
+            //    vector1.Add(intensity1[i]);
+            //    vector2.Add(0);
+            //}
+            //for (; j < mz2.Length; j++)
+            //{
+            //    vector1.Add(0);
+            //    vector2.Add(intensity2[j]);
+            //}
+
+            //numerator of dot product
+            double numerator = 0;
+            for (i = 0; i < vector1.Count; i++)
+            {
+                numerator += vector1[i] * vector2[i];
+            }
+
+            //denominator of dot product
+            double denominator = Math.Sqrt(vector1.Sum(x => x * x)) * Math.Sqrt(vector2.Sum(x => x * x));
+
+            //return dot product
+            return numerator / denominator;
         }
 
         private IEnumerable<ScanWithIndexAndNotchInfo> GetAcceptableScans(double peptideMonoisotopicMass, MassDiffAcceptor searchMode)
