@@ -154,8 +154,11 @@ namespace EngineLayer.spectralLibrarySearch
                  
                         }
                             
-                            var peaksList = new List<Product>();
-                            var peaksWithIntensityList = new Dictionary<Product, double>();
+                            //var peaksList = new List<Product>();
+                            //var peakIntensity = new List<double>();
+                            var peaks = new List<MatchedFragmentIon>();
+                            //var peaksWithIntensityList = new Dictionary<Product, List<double> > ();
+
                             for (int k = j + 1; k < j + 1 + numberOfPeaks; k++)
                             {
                                 string[] eachPeak = lines[k].Split("\t").Select(b => b.Trim()).ToArray();
@@ -169,6 +172,7 @@ namespace EngineLayer.spectralLibrarySearch
                                 FragmentationTerminus terminus = (FragmentationTerminus)Enum.Parse(typeof(FragmentationTerminus), "None", true);
                                 ProductType.a.ToString();
                                 var product = new Product(peakProductType, terminus, experMz, fragmentNumber, 0, 0);
+                                peaks.Add(new MatchedFragmentIon(ref product, experMz, experIntensity, 0));
                                 //var b = new MatchedFragmentIon(ref product, double.Parse(eachPeak[0]), double.Parse(eachPeak[1]), 1);
                                 //b.MassErrorPpm = double.Parse(by[1].Trim());
 
@@ -178,14 +182,14 @@ namespace EngineLayer.spectralLibrarySearch
                                 ////Console.WriteLine(by[0].ToCharArray()[1]);
                                 ////Console.WriteLine(b.fragmentNumber);
                                 //b.massErrorPpm = double.Parse(by[1].Trim());
-                                peaksList.Add(product);
-                                peaksWithIntensityList.Add(product, experIntensity);
+                                //peaksList.Add(product);
+                                //peakIntensity.Add(experIntensityList);
                             }
-                            singleSpectrum.Peaks = peaksList;
-                            singleSpectrum.PeaksWithIntensity = peaksWithIntensityList;
+                            //singleSpectrum.Peaks = peaksList;
+                            singleSpectrum.MatchedFragmentIons = peaks;
                         }
                     }
-                    if (singleSpectrum.Name != null &&  singleSpectrum.Peaks.Count != 0)
+                    if (singleSpectrum.Name != null &&  singleSpectrum.MatchedFragmentIons.Count != 0)
                     {
                         SpectralLibraryDictionary.Add(singleSpectrum.Name, singleSpectrum);
                     }

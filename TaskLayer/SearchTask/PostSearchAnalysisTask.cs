@@ -650,11 +650,11 @@ namespace TaskLayer
                         Status("Writing mzID...", new List<string> { Parameters.SearchTaskId, "Individual Spectra Files", fullFilePath });
 
                         string mzidFilePath = Path.Combine(Parameters.OutputFolder, strippedFileName + ".mzID");
-                        if(Parameters.CurrentRawFileList.Count > 1)
+                        if (Parameters.CurrentRawFileList.Count > 1)
                         {
                             mzidFilePath = Path.Combine(Parameters.IndividualResultsOutputFolder, strippedFileName + ".mzID");
-                        }                        
-                        MzIdentMLWriter.WriteMzIdentMl(psmsForThisFile.Where(p=>p.FdrInfo.QValue <= CommonParameters.QValueOutputFilter), subsetProteinGroupsForThisFile, Parameters.VariableModifications, Parameters.FixedModifications, Parameters.SearchParameters.SilacLabels,
+                        }
+                        MzIdentMLWriter.WriteMzIdentMl(psmsForThisFile.Where(p => p.FdrInfo.QValue <= CommonParameters.QValueOutputFilter), subsetProteinGroupsForThisFile, Parameters.VariableModifications, Parameters.FixedModifications, Parameters.SearchParameters.SilacLabels,
 
                             new List<Protease> { CommonParameters.DigestionParams.Protease }, CommonParameters.QValueOutputFilter, CommonParameters.ProductMassTolerance,
                             CommonParameters.PrecursorMassTolerance, CommonParameters.DigestionParams.MaxMissedCleavages, mzidFilePath);
@@ -669,10 +669,10 @@ namespace TaskLayer
                         Status("Writing pepXML...", new List<string> { Parameters.SearchTaskId, "Individual Spectra Files", fullFilePath });
 
                         string pepXMLFilePath = Path.Combine(Parameters.OutputFolder, strippedFileName + ".pep.XML");
-                        if(Parameters.CurrentRawFileList.Count > 1)
+                        if (Parameters.CurrentRawFileList.Count > 1)
                         {
                             pepXMLFilePath = Path.Combine(Parameters.IndividualResultsOutputFolder, strippedFileName + ".pep.XML");
-                        }                        
+                        }
 
                         PepXMLWriter.WritePepXml(psmsForThisFile.Where(p => p.FdrInfo.QValue <= CommonParameters.QValueOutputFilter).ToList(), Parameters.DatabaseFilenameList, Parameters.VariableModifications, Parameters.FixedModifications,
                             CommonParameters, pepXMLFilePath, CommonParameters.QValueOutputFilter);
@@ -868,21 +868,21 @@ namespace TaskLayer
                                 }
                             }
                         }
-                        
+
                         var oldMods = nonVariantProtein.OneBasedPossibleLocalizedModifications.ToDictionary(p => p.Key, v => v.Value);
                         if (proteinsOriginalModifications.ContainsKey(nonVariantProtein.NonVariantProtein))
                         {
                             foreach (var entry in oldMods)
                             {
-                                 if (proteinsOriginalModifications[nonVariantProtein.NonVariantProtein].ContainsKey(entry.Key))
-                                 {
+                                if (proteinsOriginalModifications[nonVariantProtein.NonVariantProtein].ContainsKey(entry.Key))
+                                {
                                     proteinsOriginalModifications[nonVariantProtein.NonVariantProtein][entry.Key].AddRange(entry.Value);
-                                 }
-                                 else
-                                 {
+                                }
+                                else
+                                {
                                     proteinsOriginalModifications[nonVariantProtein.NonVariantProtein].Add(entry.Key, entry.Value);
-                                 }                                    
-                            }                                
+                                }
+                            }
                         }
                         else
                         {
@@ -893,35 +893,35 @@ namespace TaskLayer
                         nonVariantProtein.OneBasedPossibleLocalizedModifications.Clear();
                         foreach (var kvp in modsToWrite.Where(kv => kv.Key.Item1 == null))
                         {
-                            nonVariantProtein.OneBasedPossibleLocalizedModifications.Add(kvp.Key.Item2, kvp.Value);                                
+                            nonVariantProtein.OneBasedPossibleLocalizedModifications.Add(kvp.Key.Item2, kvp.Value);
                         }
                         foreach (var sv in nonVariantProtein.SequenceVariations)
                         {
-                             var oldVariantModifications = sv.OneBasedModifications.ToDictionary(p => p.Key, v => v.Value);
-                             if (originalSequenceVariantModifications.ContainsKey(sv))
-                             {
-                                  foreach (var entry in oldVariantModifications)
-                                  {
-                                      if (originalSequenceVariantModifications[sv].ContainsKey(entry.Key))
-                                      {
-                                          originalSequenceVariantModifications[sv][entry.Key].AddRange(entry.Value);
-                                      }
-                                      else
-                                      {
-                                          originalSequenceVariantModifications[sv].Add(entry.Key, entry.Value);
-                                      }
-                                  }
-                             }
-                             else
-                             {
-                                  originalSequenceVariantModifications.Add(sv, oldVariantModifications);
-                             }
+                            var oldVariantModifications = sv.OneBasedModifications.ToDictionary(p => p.Key, v => v.Value);
+                            if (originalSequenceVariantModifications.ContainsKey(sv))
+                            {
+                                foreach (var entry in oldVariantModifications)
+                                {
+                                    if (originalSequenceVariantModifications[sv].ContainsKey(entry.Key))
+                                    {
+                                        originalSequenceVariantModifications[sv][entry.Key].AddRange(entry.Value);
+                                    }
+                                    else
+                                    {
+                                        originalSequenceVariantModifications[sv].Add(entry.Key, entry.Value);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                originalSequenceVariantModifications.Add(sv, oldVariantModifications);
+                            }
 
-                             sv.OneBasedModifications.Clear();
-                             foreach (var kvp in modsToWrite.Where(kv => kv.Key.Item1 != null && kv.Key.Item1.Equals(sv)))
-                             {
-                                 sv.OneBasedModifications.Add(kvp.Key.Item2, kvp.Value);
-                             }
+                            sv.OneBasedModifications.Clear();
+                            foreach (var kvp in modsToWrite.Where(kv => kv.Key.Item1 != null && kv.Key.Item1.Equals(sv)))
+                            {
+                                sv.OneBasedModifications.Add(kvp.Key.Item2, kvp.Value);
+                            }
                         }
 
                     }
@@ -973,10 +973,164 @@ namespace TaskLayer
                             }
                         }
                     }
-                                     
+
                 }
             }
         }
+
+        private double matchedSpectraCompare(List<MatchedFragmentIon> standardSpectra, List<MatchedFragmentIon> spectraToCompare)
+        {
+
+            double[] mz1 = standardSpectra.Select(b => b.Mz).ToArray();
+            double[] intensity1 = standardSpectra.Select(b => b.Intensity).ToArray();
+            Console.WriteLine(mz1.Length + "  " + intensity1.Length);
+
+            double[] mz2 = spectraToCompare.Select(b => b.Mz).ToArray();
+            double[] intensity2 = spectraToCompare.Select(b => b.Intensity).ToArray();
+            Console.WriteLine(mz2.Length + "  " + intensity2.Length);
+
+            var commonNumbers = mz1.Union(mz2).ToArray();
+            double min = commonNumbers.Min();
+            double max = commonNumbers.Max();
+            int roundMin = (int) min;
+            int roundMax = (int) max + 1;
+            Console.WriteLine(roundMin + "  " + roundMax);
+
+            //convert spectra to vectors
+            List<double> vector1 = new List<double>();
+            List<double> vector2 = new List<double>();
+
+            int i = 0; //iterate through mz1
+            int k = 0; //iterate through bin
+            double one = mz1[0];
+            //find where peaks match
+            while ( roundMin + k * 0.5 < roundMax)
+            {
+                
+                List<double> x1 = new List<double>();
+                if (i < mz1.Length && roundMin + k * 0.5 <= one && one < roundMin + k * 0.5 + 0.5)
+                {
+                    x1.Add(one);
+                    one = mz1[i];
+                    i++;
+                }
+                vector1.Add(x1.Sum());
+                k++;
+            }
+            Console.WriteLine("vector1: " + vector1.Count);
+
+            int j = 0; //iterate through mz2
+            k = 0; //iterate through bin
+            double two = mz2[0];
+            while ( roundMin + k * 0.5 < roundMax)
+            {
+                List<double> x2 = new List<double>();
+                if (j < mz2.Length && roundMin + k * 0.5 <= two && two < roundMin + k * 0.5 + 0.5)
+                {
+                    
+                    x2.Add(two);
+                    two = mz2[j];
+                    j++;
+                }
+                vector2.Add(x2.Sum());
+                k++;
+            }
+            Console.WriteLine("vector2: " + vector2.Count);
+
+            //numerator of dot product
+            double numerator = 0;
+            for (i = 0; i < vector1.Count; i++)
+            {
+                numerator += vector1[i] * vector2[i];
+            }
+
+            //denominator of dot product
+            double denominator = Math.Sqrt(vector1.Sum(x => x * x)) * Math.Sqrt(vector2.Sum(x => x * x));
+            Console.WriteLine(numerator + "  " + denominator);
+
+            //return dot product
+            return numerator / denominator;
+        }
+
+        private List<MatchedFragmentIon> averageTwoSpectra(List<MatchedFragmentIon> spectraOne, List<MatchedFragmentIon> spectraTwo)
+        {
+            var averageTwoSpectraResult = new List<MatchedFragmentIon>();
+            double[] mz1 = spectraOne.Select(b => b.Mz).ToArray();
+            double[] intensity1 = spectraOne.Select(b => b.Intensity).ToArray();
+            List <Product> product1 = spectraOne.Select(p => p.NeutralTheoreticalProduct).ToList();
+            double intensitySum1 = intensity1.Sum();
+
+
+            double[] mz2 = spectraTwo.Select(b => b.Mz).ToArray();
+            double[] intensity2 = spectraTwo.Select(b => b.Intensity).ToArray();
+            List<Product> product2 = spectraOne.Select(p => p.NeutralTheoreticalProduct).ToList();
+            double intensitySum2 = intensity2.Sum();
+
+            List<double> aveMz = new List<double>();
+            List<double> aveIntensity = new List<double>();
+
+            Tolerance tolerance = new PpmTolerance(40);
+            List<Product> productUnion = product1.Union(product2).ToList();
+
+            for (int x = 0; x< productUnion.Count; x++)
+            {
+                Product product = productUnion[x];
+                var mzList = new List<double>();
+                var intensityList = new List<double>();
+                var exceptMzList = new List<double>();
+                var exceptIntensityList = new List<double>();
+
+                for (int i = 0; i < spectraOne.Count; i++)
+                {
+                    if (spectraOne[i].NeutralTheoreticalProduct.Equals(product))
+                    {
+                        mzList.Add(spectraOne[i].Mz);
+                        intensityList.Add(spectraOne[i].Intensity / intensitySum1);
+                    }
+                }
+                for (int j = 0; j < spectraTwo.Count; j++)
+                {
+                    if (spectraTwo[j].NeutralTheoreticalProduct.Equals(product))
+                    {
+                        if (mzList.Count == 0)
+                        {
+                            mzList.Add(spectraTwo[j].Mz);
+                            intensityList.Add(spectraTwo[j].Intensity / intensitySum2);
+                        }
+                        else
+                        {
+                            if (tolerance.Within(mzList[0], spectraTwo[j].Mz))
+                            {
+                                mzList.Add(spectraTwo[j].Mz);
+                                intensityList.Add(spectraTwo[j].Intensity / intensitySum2);
+                            }
+                            else if (exceptMzList.Count == 0)
+                            {
+                                exceptMzList.Add(spectraTwo[j].Mz);
+                                exceptIntensityList.Add(spectraTwo[j].Intensity / intensitySum2);
+                            }
+                            else if (tolerance.Within(exceptMzList[0], spectraTwo[j].Mz))
+                            {
+                                exceptMzList.Add(spectraTwo[j].Mz);
+                                exceptIntensityList.Add(spectraTwo[j].Intensity / intensitySum2);
+                            }
+                        }
+                    }
+                }
+
+                if (mzList.Count != 0)
+                {
+                    averageTwoSpectraResult.Add(new MatchedFragmentIon(ref product, mzList.Average(), intensityList.Sum()/2, 0));
+                }
+                if (exceptMzList.Count != 0)
+                {
+                    averageTwoSpectraResult.Add(new MatchedFragmentIon(ref product, mzList.Average(), intensityList.Sum() / 2, 0));
+                }
+            }
+
+            return averageTwoSpectraResult;
+        }
+
 
         private void WritePeptideResults()
         {
@@ -985,8 +1139,18 @@ namespace TaskLayer
             // write best (highest-scoring) PSM per peptide
             string filename = "All" + GlobalVariables.AnalyteType + "s.psmtsv";
             string writtenFile = Path.Combine(Parameters.OutputFolder, filename);
-       
+
+            //write spectral library
             List<PeptideSpectralMatch> peptides = Parameters.AllPsms.GroupBy(b => b.FullSequence).Select(b => b.FirstOrDefault()).ToList();
+            //foreach(var psm in Parameters.AllPsms)
+            //{
+            //    Console.WriteLine(psm.FullSequence);
+            //    Console.WriteLine(psm.MatchedFragmentIons.Count);
+            //    foreach(var ion in psm.MatchedFragmentIons)
+            //    {
+            //        Console.WriteLine(ion.Mz +"  " + ion.Intensity + "  " + ion.NeutralTheoreticalProduct.ProductType.ToString() + "  " + ion.NeutralTheoreticalProduct.FragmentNumber + "  " + ion.Charge);
+            //    }
+            //}
             Dictionary<String, List<PeptideSpectralMatch>> PsmsGroupByPeptide = new Dictionary<String, List<PeptideSpectralMatch>>();
             var ListOfPsmsGroupByPeptide = Parameters.AllPsms.GroupBy(b => b.FullSequence);
             foreach (var x in ListOfPsmsGroupByPeptide)
@@ -999,103 +1163,39 @@ namespace TaskLayer
                 }
                 
                 PsmsGroupByPeptide.Add(x.Key, ListOfPeptideSpectralMatch);
-                
-               
             }
+
             var spectrumLibrary = new List<Spectrum>();
+
+           
             foreach(var x in PsmsGroupByPeptide)
             {
-                var peakCluster = new List<Peaks>();
-                var peakDic = new List<Peaks>();
+                List<MatchedFragmentIon> standspctra = new List<MatchedFragmentIon>();
                 if (x.Value.Count == 1)
                 {
                     double intensitySum = x.Value[0].MatchedFragmentIons.Select(m => m.Intensity).Sum();
-                    foreach(var y in x.Value[0].MatchedFragmentIons)
+
+                    foreach (var y in x.Value[0].MatchedFragmentIons)
                     {
-                        peakDic.Add( new Peaks(y.Mz, y.Intensity / intensitySum, y.NeutralTheoreticalProduct));
+                        Product product = y.NeutralTheoreticalProduct;
+                        standspctra.Add( new MatchedFragmentIon(ref product, y.Mz, y.Intensity / intensitySum, y.Charge));
                     }
-                    //spectrumLibrary.Add(new Spectrum(x.Key, peakDic));
                 }
                 else
                 {
-                    Tolerance tolerance = new PpmTolerance(40);
-                    var productDictionary = new Dictionary<int, List<Product>>();
-                    for(int j = 0; j < x.Value.Count; j++)
+                    standspctra = x.Value[0].MatchedFragmentIons; ;
+                    int a = 0;
+                    while(a < x.Value.Count-1)
                     {
-                        productDictionary.Add(j, x.Value[j].MatchedFragmentIons.Select(p => p.NeutralTheoreticalProduct).ToList());
-                    }
-                    List <Product> productUnion = productDictionary[0];
-                    for (int k = 0; k< productDictionary.Count-1; k++)
-                    {
-                        productUnion = productUnion.Union(productDictionary[k + 1]).ToList();
-                    }
-                    //foreach(var ion in x.Value[0].MatchedFragmentIons)
-                    //{
-                    //    for(int i=1; i < x.Value.Count; i++)
-                    //    {
-                    //        foreach(var eachIon in x.Value[i].MatchedFragmentIons)
-                    //        {
-                    //            if ( tolerance.Within(  ))
-                    //        }
-                    //    }
-                    //}
-
-                    foreach(var product in productUnion)
-                    {
-                        var mzList = new List<double>();
-                        var intensityList = new List<double>();
-                        var exceptMzList = new List<double>();
-                        var exceptIntensityList = new List<double>();
-                        for (int j = 0; j < x.Value.Count; j++)
+                        Console.WriteLine(x.Key + "   " + this.matchedSpectraCompare(standspctra, x.Value[a + 1].MatchedFragmentIons));
+                        if (this.matchedSpectraCompare(standspctra, x.Value[a+1].MatchedFragmentIons) > 0.95)
                         {
-                            double intensitySum = x.Value[j].MatchedFragmentIons.Select(m => m.Intensity).Sum();
-                            for (int k = 0; k < x.Value[j].MatchedFragmentIons.Count; k++)
-                            {
-
-                                if (x.Value[j].MatchedFragmentIons[k].NeutralTheoreticalProduct.Equals(product))
-                                {
-                                    if(mzList.Count == 0)
-                                    {
-                                        mzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
-                                        intensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
-                                    }
-                                    else
-                                    {
-                                        if(tolerance.Within(mzList[0], x.Value[j].MatchedFragmentIons[k].Mz))
-                                        {
-                                            mzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
-                                            intensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
-                                        }
-                                        else if(exceptMzList.Count == 0)
-                                        {
-                                            exceptMzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
-                                            exceptIntensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
-                                        }
-                                        else if(tolerance.Within(exceptMzList[0], x.Value[j].MatchedFragmentIons[k].Mz))
-                                        {
-                                            exceptMzList.Add(x.Value[j].MatchedFragmentIons[k].Mz);
-                                            exceptIntensityList.Add(x.Value[j].MatchedFragmentIons[k].Intensity / intensitySum);
-                                        }
-                                        
-                                    }
-                                   
-                                    //peaks.Add(new Peaks(x.Value[j].MatchedFragmentIons[k].Mz, x.Value[j].MatchedFragmentIons[k].Intensity));
-                                }
-                            }
+                            standspctra = this.averageTwoSpectra(standspctra, x.Value[a + 1].MatchedFragmentIons);
                         }
-                        if(mzList.Count != 0)
-                        {
-                            peakDic.Add( new Peaks(mzList.Average(), intensityList.Sum() / x.Value.Count, product));
-                        }
-                        if (exceptMzList.Count != 0)
-                        {
-                            peakDic.Add(new Peaks(exceptMzList.Average(), exceptIntensityList.Sum() / x.Value.Count, product));
-                        }
-
-
+                        a++;
                     }
                 }
-                spectrumLibrary.Add(new Spectrum(x.Key, peakDic));
+                spectrumLibrary.Add(new Spectrum(x.Key, standspctra));
             }
           
             

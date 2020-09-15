@@ -1,6 +1,7 @@
 ﻿using Chemistry;
 using EngineLayer.spectralLibrarySearch;
 using MassSpectrometry;
+using MathNet.Numerics;
 using MzLibUtil;
 using Proteomics;
 using Proteomics.Fragmentation;
@@ -24,6 +25,10 @@ namespace EngineLayer.ClassicSearch
         private readonly Ms2ScanWithSpecificMass[] ArrayOfSortedMS2Scans;
         private readonly double[] MyScanPrecursorMasses;
         private readonly SpectralLibrarySearchResults[] DotPeptideSpectralMatches;
+        private int a = 0;
+        private int b = 0;
+        private int c = 0;
+        private int d = 0;
 
         public Dictionary<String, Spectrum> SpectralLibraryDictionary { get; set; }
 
@@ -150,11 +155,28 @@ namespace EngineLayer.ClassicSearch
                                         double spectrumSharedDotProductScore = this.CalculateSharedDotProductSimilarity(scan.TheScan.TheScan.MassSpectrum, librarySpectrum, CommonParameters.ProductMassTolerance);
                                     //}
                                     //double spectrumSharedDotProductScore = this.CalculateSharedDotProductSimilarity(scan.TheScan.TheScan.MassSpectrum, librarySpectrum, CommonParameters.ProductMassTolerance);
-                                    if(thisScore < 5)
+                                    if(thisScore < 5 && spectrumDotProductScore > 0.2 )
                                     {
-                                        Console.WriteLine(thisScore + "  " + spectrumDotProductScore + "   " + spectrumSharedDotProductScore);
+                                        a++;
+                                        //Console.WriteLine(thisScore + "  " + spectrumDotProductScore + "   " + spectrumSharedDotProductScore);
                                     }
-                                    
+
+                                    if (thisScore < 5 && spectrumSharedDotProductScore > 0.9)
+                                    {
+                                        b++;
+                                        //Console.WriteLine(thisScore + "  " + spectrumDotProductScore + "   " + spectrumSharedDotProductScore);
+                                    }
+                                    if (thisScore > 5 && spectrumDotProductScore <0.2)
+                                    {
+                                        c++;
+                                        //Console.WriteLine(thisScore + "  " + spectrumDotProductScore + "   " + spectrumSharedDotProductScore);
+                                    }
+                                    if (thisScore > 5 && spectrumSharedDotProductScore < 0.9)
+                                    {
+                                        d++;
+                                        //Console.WriteLine(thisScore + "  " + spectrumDotProductScore + "   " + spectrumSharedDotProductScore);
+                                    }
+
                                     //Console.WriteLine(peptide.FullSequence +"   " +thisScore + "  " + spectrumDotProductScore + "   " );
                                     //if (DotPeptideSpectralMatches[scan.ScanIndex] == null || spectrumDotProductScore > DotPeptideSpectralMatches[scan.ScanIndex].Score)
                                     //{
@@ -349,7 +371,7 @@ namespace EngineLayer.ClassicSearch
                     }
                 });
             }
-            // Console.WriteLine("peptideMatch");
+            Console.WriteLine(a  + "   " + b + "   " + c + "   " + d);
             foreach (PeptideSpectralMatch psm in PeptideSpectralMatches.Where(p => p != null))
             {
                 psm.ResolveAllAmbiguities();
@@ -472,6 +494,6 @@ namespace EngineLayer.ClassicSearch
             return index;
         }
 
-
+        
     }
 }

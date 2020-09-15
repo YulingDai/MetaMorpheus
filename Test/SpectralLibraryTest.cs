@@ -24,7 +24,10 @@ namespace Test
 
             string myMzMLTestFile = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\SmallCalibratible_Yeast.mzML");
             string myDatabase = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\smalldb.fasta");
-            string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\avegintensityspectralLibrary.msp");
+            //string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\avegintensityspectralLibrary.msp");
+            string spectralLibrary = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\Cosine_spectralLibrary.msp");
+            
+
             DbForTask db = new DbForTask(myDatabase, true);
             DbForTask dbOfSpectralLibrary = new DbForTask(spectralLibrary, true, true);
             string spectralLibraryTestFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestSpectralLibrary");
@@ -34,6 +37,7 @@ namespace Test
             var x = new SearchTask();
           
             x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db, dbOfSpectralLibrary }, new List<string> { myMzMLTestFile }, "normal");
+            //x.RunTask(spectralLibraryTestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, "normal");
             //x.RunTask(TestFolder, new List<DbForTask> { db }, new List<string> { myMzMLTestFile }, "normal");
 
 

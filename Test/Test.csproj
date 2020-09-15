@@ -109,6 +109,9 @@
     <None Update="TestData\avegintensityspectralLibrary.msp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestData\Cosine_spectralLibrary.msp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\customBCZ.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

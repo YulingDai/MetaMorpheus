@@ -17,6 +17,12 @@ namespace EngineLayer.spectralLibrarySearch
             Name = name; ;
             PeaksInfo = peaks;
         }
+        public Spectrum(String name, List<MatchedFragmentIon> peaks)
+        {
+            Name = name; ;
+            MatchedFragmentIons = peaks;
+        }
+
         public string Name { get; set; }
         public double MW { get; set; }
         public double rententionTime { get; set; }
@@ -24,24 +30,42 @@ namespace EngineLayer.spectralLibrarySearch
         public int charge_state { get; set; }
         public List<Product> Peaks { get; set; }
         public Dictionary<Product, double> PeaksWithIntensity { get; set; }
+
         public double totalIonCurrent { get; set; }
         public double MonoisotopicMass { get; set; }
         public List<Peaks> PeaksInfo { get; set; }
+        public List<MatchedFragmentIon> MatchedFragmentIons { get; set; }
 
+
+        //public override string ToString()
+        //{
+        //    StringBuilder spectrum = new StringBuilder();
+        //    spectrum.Append("Name: " + Name + "\r\n");
+        //    //spectrum.Append("precursor: " + precursorMz);
+        //    spectrum.Append("Matched peaks number : " + this.PeaksInfo.Count + "\r\n");
+        //    foreach (var eachPeak in this.PeaksInfo)
+        //    {
+
+        //        spectrum.Append(eachPeak.Mz + "\t" + eachPeak.Intensity + "\t" + "\"" + eachPeak.Product.ProductType.ToString() + eachPeak.Product.FragmentNumber.ToString() + "/" + 0 + "ppm" + "\"" + "\r\n");
+        //    }
+
+        //     return spectrum.ToString();
+
+        //}
 
         public override string ToString()
         {
             StringBuilder spectrum = new StringBuilder();
             spectrum.Append("Name: " + Name + "\r\n");
             //spectrum.Append("precursor: " + precursorMz);
-            spectrum.Append("Matched peaks number : " + this.PeaksInfo.Count + "\r\n");
-            foreach (var eachPeak in this.PeaksInfo)
+            spectrum.Append("Matched peaks number : " + this.MatchedFragmentIons.Count + "\r\n");
+            foreach (var eachPeak in this.MatchedFragmentIons)
             {
 
-                spectrum.Append(eachPeak.Mz + "\t" + eachPeak.Intensity + "\t" + "\"" + eachPeak.Product.ProductType.ToString() + eachPeak.Product.FragmentNumber.ToString() + "/" + 0 + "ppm" + "\"" + "\r\n");
+                spectrum.Append(eachPeak.Mz + "\t" + eachPeak.Intensity + "\t" + "\"" + eachPeak.NeutralTheoreticalProduct.ProductType.ToString() + eachPeak.NeutralTheoreticalProduct.FragmentNumber.ToString() + "/" + 0 + "ppm" + "\"" + "\r\n");
             }
 
-             return spectrum.ToString();
+            return spectrum.ToString();
 
         }
     }
